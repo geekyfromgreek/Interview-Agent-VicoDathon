@@ -1573,7 +1573,7 @@
             `;
         }
 
-        // Generate and Download 2-Page PDF Assessment Report with Graphs
+        // Generate and Download Ultra-Detailed 1-Page PDF Assessment Report with Stats & Graphs
         function downloadLatestReportPDF() {
             if (!appState.feedback) {
                 downloadLatestReport(); // Trigger baseline report setup
@@ -1585,93 +1585,103 @@
             const persona = appState.selectedPersona || "Pragmatic Architect";
             const date = new Date().toLocaleDateString();
 
-            download2PagePDF(userName, role, persona, date, f);
+            downloadSinglePagePDF(userName, role, persona, date, f);
         }
 
         function downloadLatestReportPDFWithParams(userName, role, persona, date, f) {
-            download2PagePDF(userName, role, persona, date, f);
+            downloadSinglePagePDF(userName, role, persona, date, f);
         }
 
-        function download2PagePDF(userName, role, persona, date, f) {
+        function downloadSinglePagePDF(userName, role, persona, date, f) {
             const container = document.createElement('div');
             container.style.backgroundColor = '#ffffff';
 
             const summaryText = f?.summary || "Candidate demonstrated advanced architectural reasoning across core curriculum modules.";
-            const strengthsArr = f?.strengths || ["Solid mathematical grasp of vector space embeddings, Cosine similarity, and distance metrics."];
-            const gapsArr = f?.gaps || ["Could expand on automated Prometheus/Grafana metric instrumentation for LLM latency tracking."];
+            const strengthsArr = f?.strengths || ["Solid mathematical grasp of vector space embeddings & Cosine similarity."];
+            const gapsArr = f?.gaps || ["Could expand on automated Prometheus/Grafana metric instrumentation."];
             const nextArr = f?.next || ["Implement a hybrid retrieval pipeline combining BM25 keyword search with dense vector similarity."];
 
             container.innerHTML = `
-                <!-- PAGE 1 -->
-                <div style="page-break-after: always; padding: 28px; font-family: 'Hanken Grotesk', system-ui, sans-serif; color: #1e293b; background: #ffffff;">
-                    <div style="border-bottom: 3px solid #004ac6; padding-bottom: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="padding: 24px 28px; font-family: 'Hanken Grotesk', system-ui, sans-serif; color: #1e293b; background: #ffffff;">
+                    <!-- Compact Header Banner -->
+                    <div style="border-bottom: 2px solid #004ac6; padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <span style="font-size: 11px; font-weight: 800; color: #004ac6; letter-spacing: 0.1em; text-transform: uppercase;">INTERVIEW ASSESSMENT ENGINE &bull; PAGE 1 OF 2</span>
-                            <h1 style="font-size: 22px; margin: 4px 0 0 0; color: #0f172a; font-weight: 800;">interviewIQ Technical Evaluation Report</h1>
-                            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 12.5px;">Candidate: <strong style="color: #0f172a;">${userName}</strong> (${role}) &bull; Evaluator: <strong style="color: #0f172a;">${persona}</strong></p>
+                            <span style="font-size: 10px; font-weight: 800; color: #004ac6; letter-spacing: 0.1em; text-transform: uppercase;">EXECUTIVE EVALUATION REPORT &bull; INTERVIEWIQ ENGINE</span>
+                            <h1 style="font-size: 20px; margin: 2px 0 0 0; color: #0f172a; font-weight: 800;">Technical Assessment Report</h1>
+                            <p style="margin: 2px 0 0 0; color: #64748b; font-size: 11.5px;">Candidate: <strong style="color: #0f172a;">${userName}</strong> (${role}) &bull; Persona: <strong style="color: #0f172a;">${persona}</strong></p>
                         </div>
-                        <span style="font-size: 12px; font-weight: 700; color: #475569; background: #f1f5f9; padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1;">${date}</span>
+                        <span style="font-size: 11px; font-weight: 700; color: #475569; background: #f1f5f9; padding: 4px 10px; border-radius: 6px; border: 1px solid #cbd5e1;">${date}</span>
                     </div>
 
-                    <div style="background: linear-gradient(135deg, #004ac6, #1d4ed8); border-radius: 12px; padding: 18px 20px; color: #ffffff; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; opacity: 0.9;">Overall Mastery Status</span>
-                            <h2 style="font-size: 18px; margin: 2px 0 0 0; font-weight: 800;">EXCEEDS TECHNICAL BENCHMARK</h2>
-                            <p style="margin: 4px 0 0 0; font-size: 12px; opacity: 0.95;">Candidate demonstrated solid architectural trade-off reasoning across 8+ curriculum modules.</p>
+                    <!-- Top KPI Stats Strip (4 Cards) -->
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px;">
+                        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 8px 12px; text-align: center;">
+                            <span style="font-size: 9.5px; font-weight: 700; color: #1e40af; text-transform: uppercase;">Overall Mastery</span>
+                            <span style="font-size: 18px; font-weight: 900; color: #004ac6; display: block; line-height: 1.1; margin-top: 2px;">88%</span>
                         </div>
-                        <div style="background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); padding: 10px 18px; border-radius: 10px; text-align: center;">
-                            <span style="font-size: 26px; font-weight: 900; display: block; line-height: 1;">88%</span>
-                            <span style="font-size: 9.5px; font-weight: 700; text-transform: uppercase;">Cohort Score</span>
+                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 8px 12px; text-align: center;">
+                            <span style="font-size: 9.5px; font-weight: 700; color: #166534; text-transform: uppercase;">Strong Ratio</span>
+                            <span style="font-size: 18px; font-weight: 900; color: #15803d; display: block; line-height: 1.1; margin-top: 2px;">75%</span>
+                        </div>
+                        <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 8px 12px; text-align: center;">
+                            <span style="font-size: 9.5px; font-weight: 700; color: #854d0e; text-transform: uppercase;">Partial Ratio</span>
+                            <span style="font-size: 18px; font-weight: 900; color: #a16207; display: block; line-height: 1.1; margin-top: 2px;">25%</span>
+                        </div>
+                        <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; text-align: center;">
+                            <span style="font-size: 9.5px; font-weight: 700; color: #475569; text-transform: uppercase;">Response Depth</span>
+                            <span style="font-size: 18px; font-weight: 900; color: #0f172a; display: block; line-height: 1.1; margin-top: 2px;">94 / 100</span>
                         </div>
                     </div>
 
-                    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
-                        <h3 style="font-size: 13px; margin-top: 0; margin-bottom: 6px; color: #0f172a; font-weight: 800; text-transform: uppercase;">Executive Performance Summary</h3>
-                        <p style="margin: 0; font-size: 12.5px; line-height: 1.55; color: #334155;">${summaryText}</p>
+                    <!-- Executive Performance Summary -->
+                    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+                        <h3 style="font-size: 11.5px; margin-top: 0; margin-bottom: 4px; color: #0f172a; font-weight: 800; text-transform: uppercase;">Executive Performance Summary</h3>
+                        <p style="margin: 0; font-size: 11.5px; line-height: 1.5; color: #334155;">${summaryText}</p>
                     </div>
 
-                    <h3 style="font-size: 13px; color: #0f172a; font-weight: 800; text-transform: uppercase; margin-bottom: 10px;">Domain Competency Evaluation & Score Graphs</h3>
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px;">
+                    <!-- Domain Competency Score Bars Table -->
+                    <h3 style="font-size: 11.5px; color: #0f172a; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">Domain Competency Breakdown & Score Visualizer</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 11px;">
                         <thead>
                             <tr style="background-color: #f1f5f9; text-align: left; color: #475569; font-weight: 700;">
-                                <th style="padding: 9px 12px; border: 1px solid #e2e8f0;">Competency Domain</th>
-                                <th style="padding: 9px 12px; border: 1px solid #e2e8f0; width: 70px; text-align: center;">Score</th>
-                                <th style="padding: 9px 12px; border: 1px solid #e2e8f0;">Visual Score Graph Bar</th>
+                                <th style="padding: 6px 10px; border: 1px solid #e2e8f0;">Competency Domain</th>
+                                <th style="padding: 6px 10px; border: 1px solid #e2e8f0; width: 60px; text-align: center;">Score</th>
+                                <th style="padding: 6px 10px; border: 1px solid #e2e8f0;">Visual Mastery Graph</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td style="padding: 9px 12px; border: 1px solid #e2e8f0; font-weight: 600;">AI & Machine Learning Engineering</td>
-                                <td style="padding: 9px 12px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">92%</td>
-                                <td style="padding: 9px 12px; border: 1px solid #e2e8f0;">
-                                    <div style="background: #e2e8f0; height: 11px; border-radius: 6px; overflow: hidden;">
+                                <td style="padding: 6px 10px; border: 1px solid #e2e8f0; font-weight: 600;">AI & Machine Learning Engineering</td>
+                                <td style="padding: 6px 10px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">92%</td>
+                                <td style="padding: 6px 10px; border: 1px solid #e2e8f0;">
+                                    <div style="background: #e2e8f0; height: 9px; border-radius: 5px; overflow: hidden;">
                                         <div style="background: linear-gradient(90deg, #004ac6, #2563eb); width: 92%; height: 100%;"></div>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
-                                <td style="padding: 9px 12px; border: 1px solid #e2e8f0; font-weight: 600;">Backend & Scalable Data Systems</td>
-                                <td style="padding: 9px 12px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">84%</td>
-                                <td style="padding: 9px 12px; border: 1px solid #e2e8f0;">
-                                    <div style="background: #e2e8f0; height: 11px; border-radius: 6px; overflow: hidden;">
+                                <td style="padding: 6px 10px; border: 1px solid #e2e8f0; font-weight: 600;">Backend & Scalable Data Systems</td>
+                                <td style="padding: 6px 10px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">84%</td>
+                                <td style="padding: 6px 10px; border: 1px solid #e2e8f0;">
+                                    <div style="background: #e2e8f0; height: 9px; border-radius: 5px; overflow: hidden;">
                                         <div style="background: linear-gradient(90deg, #004ac6, #2563eb); width: 84%; height: 100%;"></div>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
-                                <td style="padding: 9px 12px; border: 1px solid #e2e8f0; font-weight: 600;">Systems, Protocols & DevOps</td>
-                                <td style="padding: 9px 12px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">71%</td>
-                                <td style="padding: 9px 12px; border: 1px solid #e2e8f0;">
-                                    <div style="background: #e2e8f0; height: 11px; border-radius: 6px; overflow: hidden;">
+                                <td style="padding: 6px 10px; border: 1px solid #e2e8f0; font-weight: 600;">Systems, Protocols & DevOps</td>
+                                <td style="padding: 6px 10px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">71%</td>
+                                <td style="padding: 6px 10px; border: 1px solid #e2e8f0;">
+                                    <div style="background: #e2e8f0; height: 9px; border-radius: 5px; overflow: hidden;">
                                         <div style="background: linear-gradient(90deg, #004ac6, #2563eb); width: 71%; height: 100%;"></div>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
-                                <td style="padding: 9px 12px; border: 1px solid #e2e8f0; font-weight: 600;">Product & Architecture Design</td>
-                                <td style="padding: 9px 12px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">65%</td>
-                                <td style="padding: 9px 12px; border: 1px solid #e2e8f0;">
-                                    <div style="background: #e2e8f0; height: 11px; border-radius: 6px; overflow: hidden;">
+                                <td style="padding: 6px 10px; border: 1px solid #e2e8f0; font-weight: 600;">Product & Architecture Design</td>
+                                <td style="padding: 6px 10px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">65%</td>
+                                <td style="padding: 6px 10px; border: 1px solid #e2e8f0;">
+                                    <div style="background: #e2e8f0; height: 9px; border-radius: 5px; overflow: hidden;">
                                         <div style="background: linear-gradient(90deg, #004ac6, #2563eb); width: 65%; height: 100%;"></div>
                                     </div>
                                 </td>
@@ -1679,114 +1689,85 @@
                         </tbody>
                     </table>
 
-                    <div style="display: flex; gap: 10px;">
-                        <div style="flex: 1; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; text-align: center; background: #f8fafc;">
-                            <span style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Theoretical Depth</span>
-                            <span style="font-size: 18px; font-weight: 800; color: #004ac6; display: block; margin-top: 2px;">94%</span>
-                        </div>
-                        <div style="flex: 1; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; text-align: center; background: #f8fafc;">
-                            <span style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Trade-off Analysis</span>
-                            <span style="font-size: 18px; font-weight: 800; color: #004ac6; display: block; margin-top: 2px;">88%</span>
-                        </div>
-                        <div style="flex: 1; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; text-align: center; background: #f8fafc;">
-                            <span style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Code Clarity</span>
-                            <span style="font-size: 18px; font-weight: 800; color: #004ac6; display: block; margin-top: 2px;">82%</span>
-                        </div>
-                        <div style="flex: 1; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; text-align: center; background: #f8fafc;">
-                            <span style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Observability</span>
-                            <span style="font-size: 18px; font-weight: 800; color: #004ac6; display: block; margin-top: 2px;">70%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PAGE 2 -->
-                <div style="padding: 28px; font-family: 'Hanken Grotesk', system-ui, sans-serif; color: #1e293b; background: #ffffff;">
-                    <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 11px; font-weight: 800; color: #004ac6; letter-spacing: 0.1em; text-transform: uppercase;">INTERVIEW ASSESSMENT ENGINE &bull; PAGE 2 OF 2</span>
-                        <span style="font-size: 11px; color: #64748b; font-weight: 600;">Candidate: ${userName}</span>
-                    </div>
-
-                    <div style="display: flex; gap: 16px; margin-bottom: 20px;">
-                        <div style="flex: 1; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px;">
-                            <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 13px; color: #166534; font-weight: 800; text-transform: uppercase;">Core Technical Strengths</h3>
-                            <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #15803d; line-height: 1.5;">
-                                ${strengthsArr.map(s => `<li style="margin-bottom: 4px;">${s}</li>`).join('')}
+                    <!-- Strengths & Gaps (2-Column Grid) -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 14px;">
+                        <div style="flex: 1; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px;">
+                            <h3 style="margin-top: 0; margin-bottom: 4px; font-size: 11px; color: #166534; font-weight: 800; text-transform: uppercase;">Key Technical Strengths</h3>
+                            <ul style="margin: 0; padding-left: 14px; font-size: 10.5px; color: #15803d; line-height: 1.4;">
+                                ${strengthsArr.map(s => `<li style="margin-bottom: 2px;">${s}</li>`).join('')}
                             </ul>
                         </div>
-                        <div style="flex: 1; background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 16px;">
-                            <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 13px; color: #991b1b; font-weight: 800; text-transform: uppercase;">Identified Technical Gaps</h3>
-                            <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #b91c1c; line-height: 1.5;">
-                                ${gapsArr.map(g => `<li style="margin-bottom: 4px;">${g}</li>`).join('')}
+                        <div style="flex: 1; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px;">
+                            <h3 style="margin-top: 0; margin-bottom: 4px; font-size: 11px; color: #991b1b; font-weight: 800; text-transform: uppercase;">Identified Technical Gaps</h3>
+                            <ul style="margin: 0; padding-left: 14px; font-size: 10.5px; color: #b91c1c; line-height: 1.4;">
+                                ${gapsArr.map(g => `<li style="margin-bottom: 2px;">${g}</li>`).join('')}
                             </ul>
                         </div>
                     </div>
 
-                    <h3 style="font-size: 13px; color: #0f172a; font-weight: 800; text-transform: uppercase; margin-bottom: 10px;">Question-by-Question Evaluation Analysis</h3>
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11.5px;">
+                    <!-- Question Transcript Analysis Table -->
+                    <h3 style="font-size: 11.5px; color: #0f172a; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">Question-by-Question Evaluation Transcript Analysis</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 10.5px;">
                         <thead>
                             <tr style="background-color: #f1f5f9; text-align: left; color: #475569; font-weight: 700;">
-                                <th style="padding: 8px 10px; border: 1px solid #e2e8f0; width: 40px; text-align: center;">Turn</th>
-                                <th style="padding: 8px 10px; border: 1px solid #e2e8f0;">Topic / Module Evaluated</th>
-                                <th style="padding: 8px 10px; border: 1px solid #e2e8f0;">Candidate Response Summary</th>
-                                <th style="padding: 8px 10px; border: 1px solid #e2e8f0; width: 65px; text-align: center;">Verdict</th>
+                                <th style="padding: 5px 8px; border: 1px solid #e2e8f0; width: 35px; text-align: center;">Turn</th>
+                                <th style="padding: 5px 8px; border: 1px solid #e2e8f0;">Topic / Module Evaluated</th>
+                                <th style="padding: 5px 8px; border: 1px solid #e2e8f0;">Candidate Response Strategy</th>
+                                <th style="padding: 5px 8px; border: 1px solid #e2e8f0; width: 55px; text-align: center;">Verdict</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700;">1</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; font-weight: 600;">Day 7: Vector Embeddings & Distance Metrics</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">Dense vector projections, Cosine vs L2 distance, chunking.</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center; font-weight: 800; color: #166534; background: #dcfce7;">STRONG</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700;">1</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; font-weight: 600;">Day 7: Vector Embeddings & Distance</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0;">Dense vector projections, Cosine vs L2 distance.</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 800; color: #166534; background: #dcfce7;">STRONG</td>
                             </tr>
                             <tr>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700;">2</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; font-weight: 600;">Day 8: Vector Databases & HNSW Indexing</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">HNSW graph structures, recall accuracy vs query latency.</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center; font-weight: 800; color: #166534; background: #dcfce7;">STRONG</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700;">2</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; font-weight: 600;">Day 8: Vector DBs & HNSW Indexing</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0;">HNSW graph structures, recall vs latency trade-offs.</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 800; color: #166534; background: #dcfce7;">STRONG</td>
                             </tr>
                             <tr>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700;">3</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; font-weight: 600;">Day 11: RAG Architecture & Retrieval</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">Top-k retrieval, re-ranking algorithms, out-of-domain query handling.</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center; font-weight: 800; color: #92400e; background: #fef3c7;">PARTIAL</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700;">3</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; font-weight: 600;">Day 11: RAG Architecture & Context</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0;">Top-k retrieval, re-ranking, out-of-domain handling.</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 800; color: #92400e; background: #fef3c7;">PARTIAL</td>
                             </tr>
                             <tr>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700;">4</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; font-weight: 600;">Day 22: Multi-Agent Orchestration</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">Agent delegation, state memory persistence, tool routing.</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center; font-weight: 800; color: #166534; background: #dcfce7;">STRONG</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700;">4</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; font-weight: 600;">Day 22: Multi-Agent Orchestration</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0;">Agent delegation, state memory persistence, tool routing.</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 800; color: #166534; background: #dcfce7;">STRONG</td>
                             </tr>
                             <tr>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700;">5</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; font-weight: 600;">Day 23: Model Context Protocol (MCP)</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">Custom MCP tool schema definitions, capability negotiation.</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center; font-weight: 800; color: #166534; background: #dcfce7;">STRONG</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700;">6</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; font-weight: 600;">Day 28: Docker Containerization</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">Multi-stage builds, environment isolation, health checks.</td>
-                                <td style="padding: 8px 10px; border: 1px solid #e2e8f0; text-align: center; font-weight: 800; color: #92400e; background: #fef3c7;">PARTIAL</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 700;">5</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; font-weight: 600;">Day 23: Model Context Protocol (MCP)</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0;">Custom MCP tool schema definitions, capability negotiation.</td>
+                                <td style="padding: 5px 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 800; color: #166534; background: #dcfce7;">STRONG</td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
-                        <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 13px; color: #0f172a; font-weight: 800; text-transform: uppercase;">Actionable 3-Tier Curriculum Improvement Roadmap</h3>
-                        <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #475569; line-height: 1.5;">
-                            ${nextArr.map(n => `<li style="margin-bottom: 4px;">${n}</li>`).join('')}
+                    <!-- Curriculum Roadmap -->
+                    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 10px;">
+                        <h3 style="margin-top: 0; margin-bottom: 4px; font-size: 11px; color: #0f172a; font-weight: 800; text-transform: uppercase;">Prioritized Next Steps & Curriculum Recommendations</h3>
+                        <ul style="margin: 0; padding-left: 14px; font-size: 10.5px; color: #475569; line-height: 1.4;">
+                            ${nextArr.map(n => `<li style="margin-bottom: 2px;">${n}</li>`).join('')}
                         </ul>
                     </div>
 
-                    <div style="border-top: 1px solid #e2e8f0; padding-top: 10px; text-align: center; color: #94a3b8; font-size: 11px; font-weight: 500;">
-                        Report computed dynamically by interviewIQ LLM Evaluation Engine V1.0 &bull; Page 2 of 2
+                    <!-- Sign-off Footer -->
+                    <div style="border-top: 1px solid #e2e8f0; padding-top: 6px; text-align: center; color: #94a3b8; font-size: 10px; font-weight: 500;">
+                        Report computed dynamically by interviewIQ LLM Evaluation Engine V1.0 &bull; Single-Page Assessment Executive
                     </div>
                 </div>
             `;
 
             const filename = `interview_report_${userName.toLowerCase().replace(/\s+/g, '_')}.pdf`;
             const opt = {
-                margin:       [0.2, 0.2, 0.2, 0.2],
+                margin:       [0.15, 0.15, 0.15, 0.15],
                 filename:     filename,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
