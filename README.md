@@ -10,10 +10,13 @@
 
 ---
 
-## 🌐 Live Production Links
+## 🌐 Live Production Link
 
-* **Live Frontend App (Vercel)**: [https://interview-agent-vicodathon.vercel.app](https://interview-agent-vicodathon.vercel.app)
-* **Live API Backend (Render)**: [https://interviewiq-api.onrender.com](https://interviewiq-api.onrender.com)
+> [!NOTE]
+> **For Evaluators & Judges**: The Vercel Frontend and Render Backend are **fully interconnected**. You only need to open the **Vercel Live Demo link** below to test the full application—all API calls, 3D graphics, and LLM evaluations will automatically route to the active Render backend in real time!
+
+* 🚀 **Vercel Live Demo (Judges Click Here)**: [https://interview-agent-vicodathon.vercel.app](https://interview-agent-vicodathon.vercel.app)
+* ⚙️ **Render Backend API (Auto-Connected)**: [https://interviewiq-api.onrender.com](https://interviewiq-api.onrender.com)
 
 ---
 
