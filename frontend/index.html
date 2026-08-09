@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>InterviewReady AI — Post-Cohort Technical Prep</title>
+    
+    <!-- Scripts & Tailwind CSS Config -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#360f00",
+                        "on-surface-variant": "#434655",
+                        "status-error": "#EF4444",
+                        "on-primary-fixed": "#00174b",
+                        "surface-container-low": "#f3f3fe",
+                        "on-background": "#191b23",
+                        "surface-variant": "#e1e2ed",
+                        "tertiary": "#943700",
+                        "surface-container-high": "#e7e7f3",
+                        "on-surface": "#191b23",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface": "#faf8ff",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#faf8ff",
+                        "inverse-primary": "#b4c5ff",
+                        "on-primary-container": "#eeefff",
+                        "inverse-on-surface": "#f0f0fb",
+                        "surface-container-highest": "#e1e2ed",
+                        "surface-gray": "#F8FAFC",
+                        "on-error": "#ffffff",
+                        "on-secondary-container": "#5c647a",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "secondary-container": "#dae2fd",
+                        "status-success": "#10B981",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "surface-tint": "#0053db",
+                        "outline": "#737686",
+                        "surface-container": "#ededf9",
+                        "primary-container": "#2563eb",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "border-subtle": "#E2E8F0",
+                        "secondary": "#565e74",
+                        "on-secondary-fixed": "#131b2e",
+                        "tertiary-container": "#bc4800",
+                        "surface-dim": "#d9d9e5",
+                        "on-tertiary-container": "#ffede6",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#004ac6",
+                        "inverse-surface": "#2e3039",
+                        "outline-variant": "#c3c6d7",
+                        "error-container": "#ffdad6",
+                        "background": "#faf8ff",
+                        "status-warning": "#F59E0B",
+                        "secondary-fixed": "#dae2fd",
+                        "primary-fixed": "#dbe1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "base": "4px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "gutter-mobile": "12px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "label-caps": ["JetBrains Mono"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "label-code": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "700"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "700"}],
+                        "label-code": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { 
+            background-color: #faf8ff; 
+            color: #191b23; 
+            margin: 0; 
+            padding-top: 56px; 
+            min-height: max(884px, 100dvh);
+            font-family: 'Hanken Grotesk', sans-serif;
+        }
+        .feature-card { transition: border-color 0.2s ease, transform 0.2s ease; }
+        .feature-card:hover { border-color: #2563eb; transform: translateY(-2px); }
+        .chat-container {
+            height: calc(100vh - 56px - 140px); /* TopNav (56px) - Pinned Input Area */
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        /* Custom input override for JetBrains font in message input */
+        .monospace-input {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body-md">
+
+    <!-- Top Navigation Header -->
+    <header class="fixed top-0 w-full z-50 flex items-center justify-between px-margin-mobile h-14 bg-surface border-b border-border-subtle shadow-sm">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('landing')">
+            <span class="material-symbols-outlined text-primary text-2xl">terminal</span>
+            <span class="font-label-caps text-label-caps tracking-widest text-on-surface">INTERVIEW_READY</span>
+        </div>
+        <div class="flex items-center gap-stack-md">
+            <span id="header-candidate-badge" class="hidden font-body-md text-body-md text-on-surface font-bold bg-surface-gray border border-border-subtle px-3 py-1 rounded"></span>
+            <button id="header-cta-btn" class="bg-primary-container text-on-primary font-body-md px-4 py-2 rounded-lg font-bold hover:bg-surface-tint active:scale-95 duration-150 transition-colors" onclick="navigateTo('candidate_select')">Start Interview</button>
+        </div>
+    </header>
+
+    <!-- App Container -->
+    <div id="app" class="w-full">
+        <!-- Renders dynamically -->
+    </div>
+
+    <!-- Footer -->
+    <footer class="flex flex-col items-center gap-stack-md p-stack-lg w-full bg-surface-gray border-t border-border-subtle mt-auto text-center">
+        <div class="flex gap-4">
+            <a class="font-label-code text-label-code text-on-surface-variant hover:text-on-surface opacity-80 hover:opacity-100 transition-opacity" href="#">Documentation</a>
+            <a class="font-label-code text-label-code text-on-surface-variant hover:text-on-surface opacity-80 hover:opacity-100 transition-opacity" href="#">Privacy</a>
+            <a class="font-label-code text-label-code text-on-surface-variant hover:text-on-surface opacity-80 hover:opacity-100 transition-opacity" href="#">Support</a>
+        </div>
+        <p class="font-label-caps text-label-caps text-on-surface-variant">© 2026 INTERVIEW_READY. COHORT_GRAD_SYSTEM_V1</p>
+    </footer>
+
+    <!-- Main Logic Script -->
+    <script>
+        const API_BASE = window.location.origin;
+        
+        let appState = {
+            currentScreen: 'landing',
+            candidates: [],
+            selectedCandidate: null,
+            sessionId: '',
+            transcript: [], // { role, content, focusReason, moduleN, verdict }
+            questionsAsked: 0,
+            daysCoveredCount: 0,
+            daysCoveredSet: new Set(),
+            activeModule: 1,
+            isTyping: false,
+            feedback: null,
+            activeEngineeringSection: 'ai_ml',
+            selectedPersona: 'Pragmatic Architect',
+            showConfigPanel: false
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchCandidates();
+            render();
+        });
+
+        async function fetchCandidates() {
+            try {
+                const res = await fetch(`${API_BASE}/api/candidates`);
+                if (res.ok) {
+                    const data = await res.json();
+                    appState.candidates = data.candidates || [];
+                }
+            } catch (err) {
+                console.error("Failed to fetch candidates:", err);
+            }
+        }
+
+        function setEngineeringSection(section) {
+            appState.activeEngineeringSection = section;
+            appState.showConfigPanel = false;
+            appState.selectedCandidate = null;
+            render();
+        }
+
+        function selectCandidateForConfig(cand) {
+            appState.selectedCandidate = cand;
+            appState.showConfigPanel = true;
+            render();
+        }
+
+        function setInterviewerPersona(persona) {
+            appState.selectedPersona = persona;
+            render();
+        }
+
+        function beginInterviewWithSelected() {
+            if (appState.selectedCandidate) {
+                startInterview(appState.selectedCandidate, appState.selectedPersona);
+            }
+        }
+
+        function cancelConfigPanel() {
+            appState.showConfigPanel = false;
+            appState.selectedCandidate = null;
+            render();
+        }
+
+        function getEngineeringSection(role) {
+            const r = role.toLowerCase();
+            if (r.includes('ai') || r.includes('artificial intelligence') || r.includes('machine learning')) {
+                return 'ai_ml';
+            }
+            if (r.includes('data') || r.includes('backend') || r.includes('software engineer') || r.includes('developer') || r.includes('mobile')) {
+                return 'backend_data';
+            }
+            if (r.includes('devops') || r.includes('system') || r.includes('support') || r.includes('intern') || r.includes('distinguished')) {
+                return 'devops_systems';
+            }
+            return 'product_other';
+        }
+
+
+        function navigateTo(screen) {
+            appState.currentScreen = screen;
+            
+            // Header states
+            const headerBadge = document.getElementById('header-candidate-badge');
+            const headerCta = document.getElementById('header-cta-btn');
+            
+            if (screen === 'interview_interface' && appState.selectedCandidate) {
+                headerBadge.innerText = appState.selectedCandidate.member.name;
+                headerBadge.classList.remove('hidden');
+                headerCta.innerText = 'End Interview';
+                headerCta.onclick = () => endInterviewEarly();
+            } else if (screen === 'feedback_report') {
+                headerBadge.classList.add('hidden');
+                headerCta.innerText = 'Try Another';
+                headerCta.onclick = () => navigateTo('candidate_select');
+            } else {
+                headerBadge.classList.add('hidden');
+                headerCta.innerText = 'Start Interview';
+                headerCta.onclick = () => navigateTo('candidate_select');
+            }
+            
+            render();
+        }
+
+        async function startInterview(candidate, persona) {
+            appState.selectedCandidate = candidate;
+            appState.selectedPersona = persona || appState.selectedPersona || 'Pragmatic Architect';
+            appState.sessionId = 'session-' + Math.random().toString(36).substr(2, 9);
+            appState.transcript = [];
+            appState.questionsAsked = 0;
+            appState.daysCoveredSet = new Set();
+            appState.daysCoveredCount = 0;
+            appState.activeModule = 1;
+            appState.isTyping = true;
+            appState.feedback = null;
+            appState.showConfigPanel = false;
+            
+            navigateTo('interview_interface');
+
+            try {
+                const res = await fetch(`${API_BASE}/api/interview`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: appState.sessionId,
+                        candidate: candidate,
+                        persona: appState.selectedPersona
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    appState.transcript.push({
+                        role: 'interviewer',
+                        content: data.reply,
+                        focusReason: data.focusReason,
+                        moduleN: data.moduleN
+                    });
+                    appState.questionsAsked = 1;
+                    appState.activeModule = data.moduleN || 1;
+                    if (data.moduleN) {
+                        // Guess day based on first module start
+                        appState.daysCoveredSet.add(data.moduleN * 3 - 2); 
+                        appState.daysCoveredCount = 1;
+                    }
+                } else {
+                    appState.transcript.push({
+                        role: 'interviewer',
+                        content: "Let's begin the interview. Tell me about your environment setup experiences."
+                    });
+                }
+            } catch (err) {
+                console.error("START interview failed:", err);
+                appState.transcript.push({
+                    role: 'interviewer',
+                    content: "Welcome. Let's start the session. Can you describe how you configure Python environments?"
+                });
+            } finally {
+                appState.isTyping = false;
+                render();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            if (!message || appState.isTyping) return;
+
+            input.value = '';
+            
+            // Add candidate message
+            appState.transcript.push({
+                role: 'candidate',
+                content: message
+            });
+            
+            appState.isTyping = true;
+            render();
+            scrollChat();
+
+            try {
+                const res = await fetch(`${API_BASE}/api/interview`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: appState.sessionId,
+                        message: message
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    // Update latest candidate message with verdict if returned
+                    if (data.verdict) {
+                        appState.transcript[appState.transcript.length - 1].verdict = data.verdict;
+                    }
+
+                    if (data.done) {
+                        // End of interview
+                        appState.feedback = data.feedback;
+                        navigateTo('feedback_report');
+                        return;
+                    } else {
+                        appState.transcript.push({
+                            role: 'interviewer',
+                            content: data.reply,
+                            focusReason: data.focusReason,
+                            moduleN: data.moduleN
+                        });
+                        appState.questionsAsked++;
+                        if (data.moduleN) {
+                            appState.activeModule = data.moduleN;
+                            appState.daysCoveredSet.add(data.moduleN * 3 - 1); // Mock mapping for visual representation
+                            appState.daysCoveredCount = Math.min(4, appState.daysCoveredSet.size);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("TURN failed:", err);
+                appState.transcript.push({
+                    role: 'interviewer',
+                    content: "Could you expand on your previous architectural choices?"
+                });
+            } finally {
+                appState.isTyping = false;
+                render();
+                scrollChat();
+            }
+        }
+
+        async function endInterviewEarly() {
+            if (!confirm("Are you sure you want to end this interview session?")) return;
+            
+            appState.isTyping = true;
+            render();
+
+            try {
+                // Send dummy message or call directly to get summary
+                const res = await fetch(`${API_BASE}/api/interview`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: appState.sessionId,
+                        message: "I am ready to end the interview now."
+                    })
+                });
+                
+                // Force ending fallback if we can't complete through standardcap
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.done) {
+                        appState.feedback = data.feedback;
+                    } else {
+                        // Generate mock feedback for early exit
+                        appState.feedback = {
+                            summary: "The interview was completed early by the interviewer.",
+                            strengths: ["Willingness to participate"],
+                            gaps: ["Assessment incomplete due to early exit"],
+                            next: ["Schedule a follow-up session to complete the assessment"]
+                        };
+                    }
+                }
+            } catch (err) {
+                appState.feedback = {
+                    summary: "Interview session terminated early.",
+                    strengths: ["Interactive communication"],
+                    gaps: ["Incomplete assessment details"],
+                    next: ["Re-initiate session to assess all days"]
+                };
+            } finally {
+                appState.isTyping = false;
+                navigateTo('feedback_report');
+            }
+        }
+
+        function scrollChat() {
+            const container = document.getElementById('chat-container');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        // Render Templates
+        function render() {
+            const container = document.getElementById('app');
+            
+            switch (appState.currentScreen) {
+                case 'landing':
+                    container.innerHTML = renderLanding();
+                    break;
+                case 'candidate_select':
+                    container.innerHTML = renderCandidateSelect();
+                    break;
+                case 'interview_interface':
+                    container.innerHTML = renderInterviewInterface();
+                    scrollChat();
+                    break;
+                case 'feedback_report':
+                    container.innerHTML = renderFeedbackReport();
+                    break;
+            }
+        }
+
+        function renderLanding() {
+            return `
+                <main class="w-full max-w-4xl mx-auto px-margin-mobile py-stack-lg min-h-[75vh] flex flex-col justify-center gap-stack-lg">
+                    
+                    <!-- Split Hero Section -->
+                    <section class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center py-12 mt-8">
+                        <div class="md:col-span-7 flex flex-col items-start text-left gap-stack-md">
+                            <h1 class="font-headline-lg-mobile text-headline-lg-mobile md:text-headline-lg text-on-surface">Practice Tech Interviews, Build Confidence</h1>
+                            <p class="font-body-lg text-body-lg text-on-surface-variant">A post-program interview simulator grounded in your specific cohort curriculum. Practice real questions, master your pitch, and walk into real interviews with complete confidence.</p>
+                            <div class="mt-4 w-full md:w-auto">
+                                <button class="bg-primary-container text-on-primary font-body-lg px-8 py-3 rounded-lg font-bold hover:bg-surface-tint active:scale-95 duration-150 transition-colors w-full md:w-auto" onclick="navigateTo('candidate_select')">Start Interview</button>
+                            </div>
+                            <div class="flex flex-wrap gap-stack-sm mt-6 pt-6 border-t border-border-subtle w-full">
+                                <span class="font-label-caps text-label-caps uppercase bg-surface-container text-on-surface-variant px-3 py-1 rounded-full border border-border-subtle">RAG</span>
+                                <span class="font-label-caps text-label-caps uppercase bg-surface-container text-on-surface-variant px-3 py-1 rounded-full border border-border-subtle">Vector DBs</span>
+                                <span class="font-label-caps text-label-caps uppercase bg-surface-container text-on-surface-variant px-3 py-1 rounded-full border border-border-subtle">Prompt Engineering</span>
+                                <span class="font-label-caps text-label-caps uppercase bg-surface-container text-on-surface-variant px-3 py-1 rounded-full border border-border-subtle">Agentic AI</span>
+                                <span class="font-label-caps text-label-caps uppercase bg-surface-container text-on-surface-variant px-3 py-1 rounded-full border border-border-subtle">MCP</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Hero 3D Model Column -->
+                        <div class="md:col-span-5 w-full">
+                            <div class="relative w-full h-[320px] md:h-[380px] flex items-center justify-center bg-surface-gray border border-border-subtle rounded-2xl overflow-hidden shadow-md">
+                                <model-viewer src="coding.glb" alt="Office Worker" style="width: 100%; height: 100%;" shadow-intensity="1.5" environment-image="neutral" exposure="1" loading="eager" min-camera-orbit="auto auto auto" max-camera-orbit="auto auto auto" disable-pan autoplay></model-viewer>
+                                <div class="absolute bottom-4 left-4 font-label-caps text-[10px] tracking-wider bg-surface bg-opacity-75 backdrop-blur-sm border border-border-subtle px-3 py-1 rounded text-primary flex items-center gap-1.5 shadow-sm font-bold">
+                                    <span class="flex h-2 w-2 relative">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-success opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-status-success"></span>
+                                    </span>
+                                    3D_MODEL_ACTIVE
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <section class="grid grid-cols-1 md:grid-cols-3 gap-stack-md w-full pb-12">
+                        <div class="feature-card bg-surface-gray border border-border-subtle rounded-xl p-stack-md flex flex-col gap-stack-sm items-start">
+                            <div class="w-10 h-10 border border-border-subtle rounded flex items-center justify-center text-primary-container mb-2 bg-surface-container-lowest">
+                                <span class="material-symbols-outlined text-primary text-xl">architecture</span>
+                            </div>
+                            <h3 class="font-headline-md text-headline-md text-on-surface">Grounded in real progress</h3>
+                            <p class="font-body-md text-body-md text-on-surface-variant">We index the candidate's exact curriculum mission history. The AI asks questions based solely on their specific implementations.</p>
+                        </div>
+                        <div class="feature-card bg-surface-gray border border-border-subtle rounded-xl p-stack-md flex flex-col gap-stack-sm items-start">
+                            <div class="w-10 h-10 border border-border-subtle rounded flex items-center justify-center text-primary-container mb-2 bg-surface-container-lowest">
+                                <span class="material-symbols-outlined text-primary text-xl">route</span>
+                            </div>
+                            <h3 class="font-headline-md text-headline-md text-on-surface">Adapts as you answer</h3>
+                            <p class="font-body-md text-body-md text-on-surface-variant">Dynamic follow-ups probe the depth of the candidate's knowledge. If they give a shallow answer, it digs deeper immediately.</p>
+                        </div>
+                        <div class="feature-card bg-surface-gray border border-border-subtle rounded-xl p-stack-md flex flex-col gap-stack-sm items-start">
+                            <div class="w-10 h-10 border border-border-subtle rounded flex items-center justify-center text-primary-container mb-2 bg-surface-container-lowest">
+                                <span class="material-symbols-outlined text-primary text-xl">fact_check</span>
+                            </div>
+                            <h3 class="font-headline-md text-headline-md text-on-surface">Structured feedback</h3>
+                            <p class="font-body-md text-body-md text-on-surface-variant">No vague platitudes. Receive a quantitative breakdown of systemic design choices, strengths, gaps, and recommendations.</p>
+                        </div>
+                    </section>
+                </main>
+            `;
+        }
+
+        function renderCandidateSelect() {
+            let candidatesHtml = '';
+            
+            // Filter candidates by active tab
+            const filteredCandidates = appState.candidates.filter(cand => {
+                return getEngineeringSection(cand.member.jobRole) === appState.activeEngineeringSection;
+            });
+
+            if (filteredCandidates.length === 0) {
+                candidatesHtml = `
+                    <div class="col-span-full text-center py-12 text-on-surface-variant">
+                        <span class="material-symbols-outlined text-4xl mb-2">hourglass_empty</span>
+                        <p>No candidates available in this section.</p>
+                    </div>
+                `;
+            } else {
+                filteredCandidates.forEach(cand => {
+                    const completedCount = cand.missions.filter(m => m.passed).length;
+                    const totalMissions = cand.missions.length;
+                    
+                    candidatesHtml += `
+                        <button class="flex items-center justify-between p-4 bg-surface-gray border border-border-subtle rounded-xl hover:border-primary focus:border-primary focus:outline-none transition-all group active:scale-95 duration-150 text-left w-full shadow-sm"
+                                onclick='selectCandidateForConfig(${JSON.stringify(cand)})'>
+                            <div class="flex items-center gap-stack-sm">
+                                <div class="w-12 h-12 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-lg border border-border-subtle">
+                                    ${cand.member.name.split(' ').map(n => n[0]).join('')}
+                                </div>
+                                <div>
+                                    <h3 class="font-headline-md text-headline-md text-on-surface">${cand.member.name}</h3>
+                                    <p class="font-body-md text-body-md text-on-surface-variant">${cand.member.jobRole}</p>
+                                    <p class="text-xs text-on-surface-variant font-label-code mt-0.5">${cand.member.yearsExperience} yrs exp • ${cand.member.education}</p>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end gap-1">
+                                <span class="font-label-code text-label-code text-primary font-bold">${completedCount}/${totalMissions} missions</span>
+                                <div class="w-8 h-8 rounded-full border-2 border-primary-fixed flex items-center justify-center relative bg-surface">
+                                    <span class="material-symbols-outlined text-[14px] text-primary" data-icon="chevron_right">chevron_right</span>
+                                </div>
+                            </div>
+                        </button>
+                    `;
+                });
+            }
+
+            // Tab Buttons
+            const tabsHtml = `
+                <div class="flex flex-wrap border-b border-border-subtle mb-6 gap-2">
+                    <button class="px-4 py-2 font-bold transition-all border-b-2 ${appState.activeEngineeringSection === 'ai_ml' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}" onclick="setEngineeringSection('ai_ml')">AI & ML Engineering</button>
+                    <button class="px-4 py-2 font-bold transition-all border-b-2 ${appState.activeEngineeringSection === 'backend_data' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}" onclick="setEngineeringSection('backend_data')">Backend & Data</button>
+                    <button class="px-4 py-2 font-bold transition-all border-b-2 ${appState.activeEngineeringSection === 'devops_systems' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}" onclick="setEngineeringSection('devops_systems')">Systems & DevOps</button>
+                    <button class="px-4 py-2 font-bold transition-all border-b-2 ${appState.activeEngineeringSection === 'product_other' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}" onclick="setEngineeringSection('product_other')">Product & Design</button>
+                </div>
+            `;
+
+            // Config Panel overlay/card
+            let configPanelHtml = '';
+            if (appState.showConfigPanel && appState.selectedCandidate) {
+                const cand = appState.selectedCandidate;
+                configPanelHtml = `
+                    <div class="fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center p-4">
+                        <div class="bg-surface border border-border-subtle p-6 rounded-xl flex flex-col gap-4 shadow-xl max-w-md w-full relative animate-in fade-in zoom-in-95 duration-150">
+                            <h2 class="font-headline-md text-headline-md text-on-surface">Start Assessment: ${cand.member.name}</h2>
+                            <p class="text-sm text-on-surface-variant">${cand.member.jobRole} • ${cand.member.yearsExperience} yrs exp</p>
+                            
+                            <div class="flex flex-col gap-2">
+                                <label class="font-bold text-sm text-on-surface-variant">Elect Interviewer Persona:</label>
+                                <div class="flex flex-col gap-2">
+                                    <button class="flex items-start gap-3 p-3 rounded-lg border text-left transition-all ${appState.selectedPersona === 'Pragmatic Architect' ? 'border-primary bg-surface-container-low' : 'border-border-subtle hover:border-on-surface-variant'}" onclick="setInterviewerPersona('Pragmatic Architect')">
+                                        <span class="material-symbols-outlined text-primary mt-0.5">architecture</span>
+                                        <div>
+                                            <p class="font-bold text-sm text-on-surface">Pragmatic Architect</p>
+                                            <p class="text-xs text-on-surface-variant">Focuses on high-level system trade-offs, vector search integrations, and database designs.</p>
+                                        </div>
+                                    </button>
+                                    <button class="flex items-start gap-3 p-3 rounded-lg border text-left transition-all ${appState.selectedPersona === 'Rigorous Lead' ? 'border-primary bg-surface-container-low' : 'border-border-subtle hover:border-on-surface-variant'}" onclick="setInterviewerPersona('Rigorous Lead')">
+                                        <span class="material-symbols-outlined text-primary mt-0.5">verified_user</span>
+                                        <div>
+                                            <p class="font-bold text-sm text-on-surface">Rigorous Lead</p>
+                                            <p class="text-xs text-on-surface-variant">Fast-paced, demanding, expects exact terminology, and rates answers strictly.</p>
+                                        </div>
+                                    </button>
+                                    <button class="flex items-start gap-3 p-3 rounded-lg border text-left transition-all ${appState.selectedPersona === 'Encouraging Mentor' ? 'border-primary bg-surface-container-low' : 'border-border-subtle hover:border-on-surface-variant'}" onclick="setInterviewerPersona('Encouraging Mentor')">
+                                        <span class="material-symbols-outlined text-primary mt-0.5">school</span>
+                                        <div>
+                                            <p class="font-bold text-sm text-on-surface">Encouraging Mentor</p>
+                                            <p class="text-xs text-on-surface-variant">Friendly, supportive, and provides helpful conceptual hints if you struggle.</p>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-2 mt-4">
+                                <button class="flex-grow bg-primary-container text-on-primary font-bold py-2.5 rounded-lg hover:bg-primary transition-colors active:scale-95 duration-150" onclick="beginInterviewWithSelected()">Begin Technical Assessment</button>
+                                <button class="px-4 py-2.5 border border-border-subtle text-on-surface-variant rounded-lg hover:bg-surface-gray" onclick="cancelConfigPanel()">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <main class="max-w-4xl mx-auto px-margin-mobile md:px-stack-lg py-stack-lg min-h-[75vh]">
+                    <div class="mb-6">
+                        <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-base">Select Candidate</h1>
+                        <p class="font-body-md text-body-md text-on-surface-variant">Choose a candidate profile to customize their technical interview parameters based on their mission completions.</p>
+                    </div>
+                    
+                    <!-- Engineering Tab Sections -->
+                    ${tabsHtml}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-stack-md">
+                        ${candidatesHtml}
+                    </div>
+
+                    <!-- Interview Config Overlay -->
+                    ${configPanelHtml}
+                </main>
+            `;
+        }
+
+        function renderInterviewInterface() {
+            if (!appState.selectedCandidate) return '';
+
+            let messagesHtml = '';
+            appState.transcript.forEach(msg => {
+                if (msg.role === 'interviewer') {
+                    messagesHtml += `
+                        <div class="flex flex-col gap-base items-start max-w-[85%]">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="material-symbols-outlined text-[16px] text-on-surface-variant">smart_toy</span>
+                                <span class="font-label-code text-label-code text-on-surface-variant">INTERVIEWER</span>
+                            </div>
+                            <div class="bg-surface-gray border border-border-subtle rounded-lg rounded-tl-none p-3 text-on-surface font-body-md text-body-md shadow-sm">
+                                ${msg.content}
+                            </div>
+                            ${msg.focusReason ? `
+                                <div class="mt-1 flex items-center gap-1 bg-surface-container-high px-2 py-1 rounded border border-border-subtle">
+                                    <span class="material-symbols-outlined text-[12px] text-tertiary">center_focus_strong</span>
+                                    <span class="font-label-caps text-label-caps text-tertiary">FOCUS: MODULE ${msg.moduleN || 0} • ${msg.focusReason}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    messagesHtml += `
+                        <div class="flex flex-col gap-base items-end self-end max-w-[85%]">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-label-code text-label-code text-on-surface-variant">${appState.selectedCandidate.member.name.toUpperCase()}</span>
+                                <span class="material-symbols-outlined text-[16px] text-on-surface-variant">person</span>
+                            </div>
+                            <div class="bg-primary-container border-none text-on-primary rounded-lg rounded-tr-none p-3 font-body-md text-body-md shadow-sm">
+                                ${msg.content}
+                            </div>
+                            ${msg.verdict ? `
+                                <div class="mt-1 flex items-center gap-1 bg-surface px-2 py-0.5 rounded border border-border-subtle text-xs">
+                                    <span class="font-label-code font-bold uppercase tracking-wider ${
+                                        msg.verdict === 'strong' ? 'text-status-success' :
+                                        msg.verdict === 'partial' ? 'text-status-warning' : 'text-status-error'
+                                    }">Verdict: ${msg.verdict}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+            });
+
+            if (appState.isTyping) {
+                messagesHtml += `
+                    <div class="flex flex-col gap-base items-start max-w-[85%] animate-pulse">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="material-symbols-outlined text-[16px] text-on-surface-variant">smart_toy</span>
+                            <span class="font-label-code text-label-code text-on-surface-variant">INTERVIEWER IS EVALUATING</span>
+                        </div>
+                        <div class="bg-surface-variant border-none rounded-lg rounded-tl-none p-3 flex gap-1 items-center h-[44px] shadow-sm">
+                            <div class="w-2 h-2 bg-on-surface-variant rounded-full animate-bounce"></div>
+                            <div class="w-2 h-2 bg-on-surface-variant rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            <div class="w-2 h-2 bg-on-surface-variant rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Create 8 coverage bar indicators
+            let progressSegments = '';
+            for (let i = 1; i <= 8; i++) {
+                if (i < appState.activeModule) {
+                    progressSegments += `<div class="h-2 flex-1 bg-primary rounded-sm border-r border-background"></div>`;
+                } else if (i === appState.activeModule) {
+                    progressSegments += `
+                        <div class="h-2 flex-1 bg-primary-container relative border-r border-background">
+                            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                                <span class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: 'FILL' 1;">arrow_drop_down</span>
+                            </div>
+                        </div>`;
+                } else {
+                    progressSegments += `<div class="h-2 flex-1 border border-border-subtle bg-surface-gray rounded-sm"></div>`;
+                }
+            }
+
+            return `
+                <main class="flex-grow pt-[16px] flex flex-col md:flex-row max-w-5xl mx-auto w-full px-margin-mobile relative gap-6">
+                    
+                    <!-- Left Sidebar Panel -->
+                    <section class="w-full md:w-64 flex flex-col gap-4 py-2 border-b md:border-b-0 md:border-r border-border-subtle pr-0 md:pr-6 shrink-0 mt-4">
+                        <div class="bg-surface-gray border border-border-subtle rounded-xl p-4 flex flex-col gap-3">
+                            <h2 class="font-headline-md text-headline-md border-b border-border-subtle pb-2">Session Stats</h2>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-on-surface-variant">Questions:</span>
+                                <span class="font-bold text-primary">${appState.questionsAsked} / 8+</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-on-surface-variant">Days Covered:</span>
+                                <span class="font-bold text-primary">${appState.daysCoveredCount} / 4+</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-on-surface-variant">Active Module:</span>
+                                <span class="font-bold text-primary">${appState.activeModule} / 8</span>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Chat Console -->
+                    <section class="flex-grow flex flex-col relative min-h-[60vh]">
+                        <!-- Curriculum progress map header -->
+                        <div class="py-stack-md w-full bg-background z-30 border-b border-border-subtle mb-4">
+                            <div class="flex items-center justify-between gap-1 w-full">
+                                ${progressSegments}
+                            </div>
+                            <div class="flex justify-between mt-2">
+                                <span class="font-label-caps text-label-caps text-on-surface-variant">MODULE ${appState.activeModule} FOCUS</span>
+                                <span class="font-label-caps text-label-caps text-on-surface-variant">Q# ${appState.questionsAsked}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat message thread -->
+                        <div id="chat-container" class="chat-container py-stack-md flex flex-col gap-stack-lg flex-grow">
+                            ${messagesHtml}
+                        </div>
+                        
+                        <!-- Pinned Message Input panel -->
+                        <div class="w-full bg-surface border border-border-subtle p-stack-sm rounded-xl shadow-md my-4 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+                            <div class="flex items-center gap-stack-sm bg-transparent p-1">
+                                <input id="message-input" class="flex-grow bg-transparent border-none focus:ring-0 font-body-md text-body-md text-on-surface placeholder-on-surface-variant outline-none py-2 monospace-input" 
+                                       placeholder="Type candidate answer and hit Enter..." type="text"
+                                       onkeydown="if(event.key === 'Enter') sendMessage()"/>
+                                <button class="bg-primary-container text-on-primary p-2 rounded hover:bg-primary transition-colors flex items-center justify-center h-10 w-10 active:scale-95 duration-150"
+                                        onclick="sendMessage()">
+                                    <span class="material-symbols-outlined text-[20px]">send</span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+            `;
+        }
+
+        function renderFeedbackReport() {
+            if (!appState.feedback) return '';
+
+            let strengthsHtml = '';
+            appState.feedback.strengths.forEach(str => {
+                strengthsHtml += `<span class="font-label-code text-label-code bg-surface-container-low text-primary px-2 py-1 rounded border border-border-subtle">${str}</span>`;
+            });
+            if (appState.feedback.strengths.length === 0) {
+                strengthsHtml = `<span class="text-sm text-on-surface-variant">None recorded.</span>`;
+            }
+
+            let gapsHtml = '';
+            appState.feedback.gaps.forEach(gap => {
+                gapsHtml += `<span class="font-label-code text-label-code bg-error-container text-on-error-container px-2 py-1 rounded border border-border-subtle">${gap}</span>`;
+            });
+            if (appState.feedback.gaps.length === 0) {
+                gapsHtml = `<span class="text-sm text-on-surface-variant">None recorded.</span>`;
+            }
+
+            let nextHtml = '';
+            appState.feedback.next.forEach(step => {
+                nextHtml += `
+                    <label class="flex items-center gap-3 cursor-pointer py-1">
+                        <input class="form-checkbox h-5 w-5 text-primary border-outline rounded bg-surface" type="checkbox"/>
+                        <span class="font-body-md text-body-md text-on-surface">${step}</span>
+                    </label>
+                `;
+            });
+
+            // Reconstruct timeline of verdicts from transcript
+            let timelineHtml = '';
+            let qIdx = 1;
+            appState.transcript.forEach((msg, idx) => {
+                // If this is an interviewer question, find the candidate's answer following it
+                if (msg.role === 'interviewer') {
+                    const nextMsg = appState.transcript[idx + 1];
+                    const verdict = (nextMsg && nextMsg.verdict) ? nextMsg.verdict : 'partial';
+                    const answer = nextMsg ? nextMsg.content : 'No answer provided.';
+                    
+                    let bgClass = 'bg-[#FEF3C7] text-[#92400E] border-status-warning';
+                    let barClass = 'bg-status-warning';
+                    if (verdict === 'strong') {
+                        bgClass = 'bg-[#D1FAE5] text-[#065F46] border-status-success';
+                        barClass = 'bg-status-success';
+                    } else if (verdict === 'gap') {
+                        bgClass = 'bg-[#FEE2E2] text-[#991B1B] border-status-error';
+                        barClass = 'bg-status-error';
+                    }
+
+                    timelineHtml += `
+                        <details class="group bg-surface-gray border border-border-subtle rounded cursor-pointer [&_summary::-webkit-details-marker]:hidden my-2 shadow-sm">
+                            <summary class="flex items-center justify-between p-stack-md select-none relative overflow-hidden">
+                                <div class="absolute left-0 top-0 bottom-0 w-1.5 ${barClass}"></div>
+                                <div class="flex items-center gap-4">
+                                    <span class="material-symbols-outlined text-on-surface-variant group-open:rotate-180 transition-transform">expand_more</span>
+                                    <div>
+                                        <span class="font-label-caps text-label-caps text-on-surface-variant block uppercase font-bold text-xs">${msg.focusReason || 'GENERAL'}</span>
+                                        <span class="font-body-md text-body-md font-bold">${msg.content}</span>
+                                    </div>
+                                </div>
+                                <span class="font-label-code text-label-code px-3 py-1 rounded uppercase tracking-wider text-xs border ${bgClass}">${verdict}</span>
+                            </summary>
+                            <div class="p-stack-md pt-0 text-on-surface-variant font-body-md text-body-md border-t border-border-subtle mt-2 bg-surface">
+                                <p class="font-bold text-on-surface mb-1 mt-2">Candidate Response:</p>
+                                <p class="monospace-input text-sm p-3 bg-surface-gray rounded border border-border-subtle text-on-surface">${answer}</p>
+                            </div>
+                        </details>
+                    `;
+                    qIdx++;
+                }
+            });
+
+            return `
+                <main class="flex-grow px-margin-mobile py-stack-lg max-w-3xl mx-auto w-full flex flex-col gap-6 min-h-[80vh] mt-4">
+                    <!-- Summary block -->
+                    <section class="flex flex-col gap-stack-sm bg-surface-gray border border-border-subtle p-stack-md rounded-xl shadow-sm">
+                        <h1 class="font-headline-lg-mobile text-headline-lg-mobile md:text-headline-lg mb-2">Technical Interview Report</h1>
+                        <p class="font-body-md text-body-md text-on-surface font-semibold">Candidate: ${appState.selectedCandidate.member.name} (${appState.selectedCandidate.member.jobRole})</p>
+                        <p class="font-body-md text-body-md text-on-surface-variant mt-2">
+                            ${appState.feedback.summary}
+                        </p>
+                    </section>
+                    
+                    <!-- Strengths and Gaps -->
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+                        <!-- Strengths -->
+                        <div class="bg-surface-gray border border-border-subtle p-stack-md rounded-xl flex flex-col gap-stack-sm relative overflow-hidden shadow-sm">
+                            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-status-success"></div>
+                            <h2 class="font-label-caps text-label-caps text-on-surface-variant mb-2 font-bold tracking-wider">STRENGTHS</h2>
+                            <div class="flex flex-wrap gap-2">
+                                ${strengthsHtml}
+                            </div>
+                        </div>
+                        
+                        <!-- Gaps -->
+                        <div class="bg-surface-gray border border-border-subtle p-stack-md rounded-xl flex flex-col gap-stack-sm relative overflow-hidden shadow-sm">
+                            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-status-error"></div>
+                            <h2 class="font-label-caps text-label-caps text-on-surface-variant mb-2 font-bold tracking-wider">IDENTIFIED GAPS</h2>
+                            <div class="flex flex-wrap gap-2">
+                                ${gapsHtml}
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Timeline / Replay -->
+                    <section class="flex flex-col gap-stack-sm">
+                        <h2 class="font-headline-md text-headline-md border-b border-border-subtle pb-2">Response Timeline</h2>
+                        <div class="flex flex-col gap-2 mt-2">
+                            ${timelineHtml}
+                        </div>
+                    </section>
+                    
+                    <!-- Next Steps -->
+                    <section class="flex flex-col gap-stack-sm">
+                        <h2 class="font-headline-md text-headline-md border-b border-border-subtle pb-2">Recommended Next Actions</h2>
+                        <div class="bg-surface-gray border border-border-subtle p-stack-md rounded-xl flex flex-col gap-2 mt-2 shadow-sm">
+                            ${nextHtml}
+                        </div>
+                    </section>
+                    
+                    <!-- Back CTA -->
+                    <div class="mt-4">
+                        <button class="w-full bg-primary-container text-on-primary font-headline-md text-headline-md py-3 px-4 rounded-xl hover:bg-surface-tint transition-colors active:scale-95 duration-150 flex items-center justify-center gap-2 font-bold"
+                                onclick="navigateTo('candidate_select')">
+                            Try Another Candidate
+                            <span class="material-symbols-outlined">arrow_forward</span>
+                        </button>
+                    </div>
+                </main>
+            `;
+        }
+    </script>
+</body>
+</html>

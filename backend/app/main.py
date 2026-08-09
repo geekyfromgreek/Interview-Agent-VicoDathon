@@ -11,6 +11,7 @@ Request type determined by payload shape:
 
 from __future__ import annotations
 
+import os
 import logging
 
 from fastapi import FastAPI, HTTPException
@@ -33,8 +34,8 @@ logger = logging.getLogger(__name__)
 # ─── App ─────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="ABTalks AI Interview Agent",
-    description="Personalized multi-turn technical interview backend.",
+    title="InterviewReady AI",
+    description="Post-cohort technical interview practice and confidence builder.",
     version="1.0.0",
 )
 
@@ -297,4 +298,5 @@ def _should_end_interview(
 
 # ─── Static Mount ────────────────────────────────────────────────────
 
-app.mount("/", StaticFiles(directory="app/static", html=True), name="static")
+frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend"))
+app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")

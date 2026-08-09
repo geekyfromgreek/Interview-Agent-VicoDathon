@@ -252,7 +252,7 @@ One-line summary: User requesting to focus on building the frontend and connecti
 
 ## Prompt 9: Groq API Key and gitignore Configuration Request
 ```
-now wanna setup an llm api for the perosnalized answers, i wanna use grpq but dont wanna expose key during submission create .enc adn gitignore heres my key :gsk_S0FeUvboFzyOGBYu2NbWWGdyb3FYt1Nm[masked]
+now wanna setup an llm api for the perosnalized answers, i wanna use grpq but dont wanna expose key during submission create .enc adn gitignore heres my key :gsk_REDACTED_SECRET_KEY
 ```
 
 One-line summary: User requesting to set up Groq API key in .env and gitignore to prevent key exposure.
@@ -292,6 +292,66 @@ One-line summary: User requesting to categorize candidates into sections by engi
 ```
 
 One-line summary: User requesting the LLM to greet back or answer generic queries dynamically before prompting to return to the technical question.
+
+---
+
+## Prompt 14: 3D Model on Landing Page Request
+```
+now landing pagee looks s o mepty, i wanna    add a 3d model that is free adn looks relvant there
+```
+
+One-line summary: User requesting to add a free and relevant 3D model/animation to the landing page to fill the empty visual space.
+
+---
+
+## Prompt 15: Interview Workspace Illustration Request
+```
+find something related to interview,, like a person sitting on desk or working in office
+```
+
+One-line summary: User requesting to replace the 3D grid with an interview-related asset like a person working at an office desk.
+
+---
+
+## Prompt 16: Fix Image Path Request
+```
+not visbile and interative, find me online if u cant fix it
+```
+
+One-line summary: User pointing out that the landing page illustration is broken (showing alt text), requesting a fix or finding an online alternative.
+
+---
+
+## Prompt 17: Embed 3D Model with Locked Rotations Request
+```
+theresss a office worker model i added in our folder, add it to mainscreen, lock all axis for rotations
+```
+
+One-line summary: User requesting to render their custom GLB 3D model (office-worker) on the landing page, locking all rotation axes.
+
+---
+
+## Prompt 18: Autoplay 3D Model Animation Request
+```
+model is not playing, [lay in a loop
+```
+
+One-line summary: User requesting to play the GLB model's animation in a continuous loop.
+
+---
+
+## Prompt 19: Rename Application Request
+```
+now since this is for interview after the program,adn help u build confidence and practice for real interviews, name it acccordingly
+```
+
+One-line summary: User requesting to rename the app and titles to highlight post-program confidence building and real interview practice.
+
+
+
+
+
+
 
 
 
