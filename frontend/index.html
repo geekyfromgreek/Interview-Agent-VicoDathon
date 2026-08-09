@@ -1881,20 +1881,26 @@
                 margin:       [0.1, 0.1, 0.1, 0.1],
                 filename:     filename,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
+                html2canvas:  { scale: 2, useCORS: true, windowWidth: 1024, scrollX: 0, scrollY: 0 },
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
-            // Append container off-screen to document.body so html2canvas can measure & render DOM layout
-            container.style.position = 'fixed';
-            container.style.left = '-9999px';
+            // Mobile-friendly rendering container positioned behind layout so iOS/Android WebKit rasterizes DOM
+            container.style.position = 'absolute';
+            container.style.left = '0';
             container.style.top = '0';
             container.style.width = '800px';
+            container.style.zIndex = '-9999';
+            container.style.opacity = '0.99';
+            container.style.pointerEvents = 'none';
+            container.style.backgroundColor = '#ffffff';
             document.body.appendChild(container);
 
             if (window.html2pdf) {
                 html2pdf().set(opt).from(container).save().then(() => {
-                    if (document.body.contains(container)) document.body.removeChild(container);
+                    setTimeout(() => {
+                        if (document.body.contains(container)) document.body.removeChild(container);
+                    }, 500);
                 }).catch(err => {
                     console.error("PDF export failed:", err);
                     if (document.body.contains(container)) document.body.removeChild(container);
