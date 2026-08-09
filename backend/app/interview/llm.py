@@ -143,15 +143,19 @@ def generate_question(
 
     system_prompt = (
         f"{persona_instruction}\n"
-        f"CRITICAL MANDATORY GREETING RULE: You MUST start your reply string with 'Hello {user_name}, ...' or 'Welcome {user_name}, ...'. NEVER omit candidate name '{user_name}' from the opening sentence.\n"
+        f"CRITICAL MANDATORY GREETING RULE: The person you are interviewing is named '{user_name}'. "
+        f"You MUST start your reply with 'Hello {user_name},' or 'Welcome {user_name},'. "
+        f"NEVER use the candidate profile name in the greeting — ONLY use '{user_name}'.\n"
         "Ask ONE clear, specific technical question that tests whether the candidate truly understands "
         "the topic — not a yes/no question. Personalise the question to their role.\n\n"
         "You MUST respond with a JSON object and nothing else:\n"
-        '{"reply": "<your question starting with Hello {user_name}>", "moduleN": <int>, "focusReason": "<short reason>"}'
+        '{"reply": "<your question starting with Hello ' + user_name + '>", "moduleN": <int>, "focusReason": "<short reason>"}'
     )
 
     user_prompt = (
-        f"Candidate: {candidate_name} ({candidate_role})\n"
+        f"The interviewee's name is: {user_name}\n"
+        f"Their profile/role context: {candidate_name} ({candidate_role})\n"
+        f"IMPORTANT: Greet '{user_name}' by name, NOT '{candidate_name}'.\n\n"
         f"Topic: Day {focus_area['day']} — {focus_area['title']}\n"
         f"Module: {focus_area['moduleN']}\n"
         f"Focus reason: {focus_area['reason']}\n"
@@ -300,21 +304,20 @@ def grade_and_continue(
         f"You are grading a technical interview answer for '{user_name}' and generating the next response.\n"
         "Be fair and analytical — award 'strong' for accurate/solid understanding, "
         "'partial' for surface-level answers, and 'gap' for wrong, incorrect, or missing knowledge.\n\n"
-        "LIVE INTERVIEW CONTEXT RETENTION RULE:\n"
-        "1. You MUST maintain active live memory of the ENTIRE transcript history provided below.\n"
-        "2. Frequently tie your reactions back to specific statements, tools, or architectural decisions the candidate mentioned in earlier turns (e.g. 'Earlier you mentioned vector chunking with FAISS—how does that connect to...').\n"
-        "3. NEVER treat questions in isolation. Build a continuous, evolving technical conversation.\n\n"
-        "DEEP EVALUATION & DYNAMIC CHATBOT RULE:\n"
-        "1. READ and EVALUATE candidate's latest response carefully against the full transcript history.\n"
-        "2. In 'nextQuestion', start by explicitly addressing their exact words or technical concept (e.g., 'You mentioned X...').\n"
-        "3. If their answer is correct/strong, validate why it's right with a 1-sentence technical insight. If partial or gap, highlight the exact missing nuance in 1 sentence.\n"
-        "4. NEVER output repetitive or canned template text. Every single response MUST be dynamically generated live by Groq AI, completely tailored to what the candidate just typed.\n"
-        "5. THEN ask your next follow-up question or pivot seamlessly to the next focus topic.\n\n"
+        "INTERVIEW CONDUCT RULES:\n"
+        "1. Keep the conversation focused on the CURRENT TECHNICAL TOPIC. Do NOT let the candidate distract you with off-topic remarks or redirect the conversation.\n"
+        "2. If the candidate says something off-topic, briefly acknowledge it (1 short sentence max), then firmly steer back to the technical question.\n"
+        "3. Do NOT repeatedly say 'you mentioned' or 'as you said' — vary your language naturally. Give a brief evaluation, then move on to the next question.\n"
+        "4. Keep your responses concise: 1 short sentence of feedback + 1 clear follow-up question. Do NOT write long paragraphs.\n\n"
+        "EVALUATION RULE:\n"
+        "1. Evaluate the candidate's latest response against the expected answer reference.\n"
+        "2. If correct/strong, give a brief validation (e.g., 'Good, that's correct.'). If partial, note what's missing in 1 sentence. If gap, point out the error briefly.\n"
+        "3. Then ask a NEW follow-up question or move to the next topic. Never repeat the same question.\n\n"
         "You MUST respond with a JSON object and nothing else:\n"
         "{\n"
         '  "verdict": "strong" | "partial" | "gap",\n'
         '  "shouldEnd": true | false,\n'
-        '  "nextQuestion": "<1-2 sentence direct evaluation referencing candidate exact words + tailored follow-up question>",\n'
+        '  "nextQuestion": "<1 sentence brief feedback + 1 clear follow-up question>",\n'
         '  "moduleN": <int, active topic module>,\n'
         '  "focusReason": "<active topic title>"\n'
         "}\n\n"
@@ -322,7 +325,7 @@ def grade_and_continue(
     )
 
     user_prompt = (
-        f"Candidate: {candidate_name} ({candidate_role})\n"
+        f"Interviewee name: {user_name} (profile: {candidate_name}, role: {candidate_role})\n"
         f"Questions asked so far: {questions_asked}\n"
         f"Distinct days covered: {len(days_covered)}\n"
         f"Current question being answered: {current_question}\n\n"
@@ -335,8 +338,8 @@ def grade_and_continue(
         f"{next_topic_block}"
         f"\n\nEVALUATION TASK:\n"
         "1. Compare candidate's latest response against the Predefined Expected Model Answer above.\n"
-        "2. Check if their answer is close to the expected concept. If close, assign 'strong'. If surface level, assign 'partial'. If wrong/missing, assign 'gap'.\n"
-        "3. Generate a tailored response based on their exact input, applying the INTERACTION RULE."
+        "2. If close to expected concept, assign 'strong'. If surface level, assign 'partial'. If wrong/missing, assign 'gap'.\n"
+        "3. Give brief feedback (1 sentence) and ask the next question. Stay on topic — do not let the candidate distract you."
     )
 
     try:
