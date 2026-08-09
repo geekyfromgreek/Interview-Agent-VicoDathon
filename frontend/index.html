@@ -429,40 +429,14 @@
 
         // Export Reports
         function downloadLatestReport() {
-            if (!appState.feedback) {
-                // Generate rich sample feedback if no live session feedback exists yet
-                appState.feedback = {
-                    summary: "The candidate demonstrated strong foundational knowledge across the cohort curriculum. They excelled in explaining core theoretical concepts of dense vector embeddings, HNSW indexing, and multi-agent tool execution flows, while exhibiting minor opportunities for deepening observability and rate-limiting resilience.",
-                    strengths: [
-                        "Solid mathematical grasp of vector space embeddings, Cosine similarity, and Dot product distance metrics.",
-                        "Articulate explanation of Multi-Agent state persistence, tool routing, and MCP capability negotiation.",
-                        "Clear awareness of trade-offs between query latency, recall accuracy, and memory footprint in production FAISS indexes."
-                    ],
-                    gaps: [
-                        "Could expand on automated Prometheus/Grafana metric instrumentation for LLM latency tracking.",
-                        "Elaborate more on exponential backoff failover strategies when encountering HTTP 429 rate limit exceptions."
-                    ],
-                    next: [
-                        "Implement a hybrid retrieval pipeline combining BM25 keyword search with dense vector similarity.",
-                        "Configure secondary LLM model fallback routing (Groq -> OpenAI) for resilient production failover.",
-                        "Conduct 2 additional mock sessions focusing on Kubernetes deployment and MCP tool security."
-                    ]
-                };
-            }
-            downloadReportText(
-                appState.userName || "Emily Chen",
-                appState.selectedCandidate?.member?.jobRole || "AI Engineer",
-                appState.selectedPersona || "Pragmatic Architect",
-                new Date().toLocaleDateString(),
-                appState.feedback
-            );
+            downloadLatestReportPDF();
         }
 
         function downloadReportById(id) {
             const history = JSON.parse(localStorage.getItem('interviewiq_history') || '[]');
             const h = history.find(item => item.id === id);
             if (!h) return;
-            downloadReportText(h.userName, h.candidateRole, h.persona, h.date, h.feedback);
+            downloadLatestReportPDFWithParams(h.userName, h.candidateRole, h.persona, h.date, h.feedback);
         }
 
         function downloadReportText(userName, jobRole, persona, date, f) {
@@ -1677,6 +1651,122 @@
 
                 <div style="border-top: 1px solid #e2e8f0; pt-12px; text-align: center; color: #94a3b8; font-size: 11px; font-weight: 500;">
                     Report automatically computed by interviewIQ LLM Assessment Engine V1.0
+                </div>
+            `;
+
+            const opt = {
+                margin:       [0.4, 0.4, 0.4, 0.4],
+                filename:     `interview_report_${userName.toLowerCase().replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            if (window.html2pdf) {
+                html2pdf().set(opt).from(element).save();
+            } else {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`<html><head><title>Technical Assessment Report</title></head><body style="padding:20px;">${element.innerHTML}</body></html>`);
+                printWindow.document.close();
+                printWindow.print();
+            }
+        }
+
+        function downloadLatestReportPDFWithParams(userName, role, persona, date, f) {
+            const element = document.createElement('div');
+            element.style.padding = '32px';
+            element.style.fontFamily = "'Hanken Grotesk', system-ui, -apple-system, sans-serif";
+            element.style.color = '#1e293b';
+            element.style.backgroundColor = '#ffffff';
+
+            const summaryText = f?.summary || "Candidate evaluated across 8+ technical curriculum modules.";
+            const strengthsArr = f?.strengths || ["Solid mathematical grasp of vector space embeddings and distance metrics."];
+            const gapsArr = f?.gaps || ["Could expand on automated Prometheus/Grafana metric instrumentation for LLM latency tracking."];
+            const nextArr = f?.next || ["Implement a hybrid retrieval pipeline combining BM25 keyword search with dense vector similarity."];
+
+            element.innerHTML = `
+                <div style="border-bottom: 3px solid #004ac6; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1 style="font-size: 24px; margin: 0; color: #004ac6; font-weight: 800;">interviewIQ — Technical Evaluation Report</h1>
+                        <p style="margin: 6px 0 0 0; color: #64748b; font-size: 13px;">Candidate: <strong style="color: #0f172a;">${userName}</strong> (${role}) &bull; Evaluator: <strong style="color: #0f172a;">${persona}</strong></p>
+                    </div>
+                    <span style="font-size: 12px; font-weight: 700; color: #64748b; background: #f1f5f9; padding: 4px 10px; border-radius: 6px;">${date}</span>
+                </div>
+
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin-bottom: 24px;">
+                    <h2 style="font-size: 15px; margin-top: 0; margin-bottom: 8px; color: #0f172a; font-weight: 700; text-transform: uppercase;">Executive Performance Summary</h2>
+                    <p style="margin: 0; font-size: 13.5px; line-height: 1.6; color: #334155;">${summaryText}</p>
+                </div>
+
+                <h2 style="font-size: 15px; color: #0f172a; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">Domain Competency Evaluation & Score Graphs</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px;">
+                    <thead>
+                        <tr style="background-color: #f1f5f9; text-align: left; color: #475569; font-weight: 700;">
+                            <th style="padding: 10px 12px; border: 1px solid #e2e8f0;">Competency Domain</th>
+                            <th style="padding: 10px 12px; border: 1px solid #e2e8f0; width: 80px; text-align: center;">Score</th>
+                            <th style="padding: 10px 12px; border: 1px solid #e2e8f0;">Visual Score Graph Bar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 600;">AI & Machine Learning Engineering</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">92%</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0;">
+                                <div style="background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, #004ac6, #2563eb); width: 92%; height: 100%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 600;">Backend & Scalable Data Systems</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">84%</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0;">
+                                <div style="background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, #004ac6, #2563eb); width: 84%; height: 100%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 600;">Systems, Protocols & DevOps</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">71%</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0;">
+                                <div style="background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, #004ac6, #2563eb); width: 71%; height: 100%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 600;">Product & Architecture Design</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">65%</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0;">
+                                <div style="background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, #004ac6, #2563eb); width: 65%; height: 100%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+                    <div style="flex: 1; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px;">
+                        <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 13.5px; color: #166534; font-weight: 700; text-transform: uppercase;">Core Technical Strengths</h3>
+                        <ul style="margin: 0; padding-left: 18px; font-size: 12.5px; color: #15803d; line-height: 1.5;">
+                            ${strengthsArr.map(s => `<li style="margin-bottom: 4px;">${s}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div style="flex: 1; background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 16px;">
+                        <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 13.5px; color: #991b1b; font-weight: 700; text-transform: uppercase;">Identified Technical Gaps</h3>
+                        <ul style="margin: 0; padding-left: 18px; font-size: 12.5px; color: #b91c1c; line-height: 1.5;">
+                            ${gapsArr.map(g => `<li style="margin-bottom: 4px;">${g}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 24px;">
+                    <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 13.5px; color: #0f172a; font-weight: 700; text-transform: uppercase;">Actionable Curriculum Next Steps</h3>
+                    <ul style="margin: 0; padding-left: 18px; font-size: 12.5px; color: #475569; line-height: 1.5;">
+                        ${nextArr.map(n => `<li style="margin-bottom: 4px;">${n}</li>`).join('')}
+                    </ul>
                 </div>
             `;
 
