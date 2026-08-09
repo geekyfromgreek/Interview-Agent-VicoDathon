@@ -528,6 +528,24 @@ One-line summary: User noting Railway's $5 trial limit and requesting a 100% fre
 
 One-line summary: User sharing screenshot showing environment variable named 'groq api key' instead of 'LLM_API_KEY'.
 
+---
+
+## Prompt 33: Railway Secret Groq Build Failure Raw Editor Resolution Query
+```
+  [38;5;245m$[0m [1muvicorn backend.app.main:app --host 0.0.0.0 --port $PORT[0m
+
+load build definition from ./railpack-plan.json
+
+
+install mise packages: python
+
+
+Build Failed: build daemon returned an error < failed to solve: secret groq not found > crashed
+```
+
+One-line summary: User reporting persistent 'secret groq not found' Railway build error and requesting Raw Editor fix instructions.
+
+
 
 
 
