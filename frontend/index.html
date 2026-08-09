@@ -732,22 +732,63 @@
                     }
                     startInterviewTimer();
                     speakInterviewerText(data.reply);
+                    return;
                 } else {
-                    appState.transcript.push({
-                        role: 'interviewer',
-                        content: "Let's begin the interview. Tell me about your environment setup experiences."
-                    });
-                    startInterviewTimer();
-                    speakInterviewerText("Let's begin the interview. Tell me about your environment setup experiences.");
+                    throw new Error(`Start request failed HTTP ${res.status}`);
                 }
             } catch (err) {
-                console.error("START interview failed:", err);
+                console.error("START interview failed, retrying for personalized Groq greeting:", err);
+                
+                // Retry loop to wait for Render cold-start and get personalized Groq greeting with candidate name
+                for (let attempt = 1; attempt <= 3; attempt++) {
+                    try {
+                        await new Promise(r => setTimeout(r, attempt * 1500));
+                        const retryRes = await fetch(`${getApiBase()}/api/interview`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                sessionId: appState.sessionId,
+                                candidate: candidate,
+                                persona: appState.selectedPersona,
+                                userName: appState.userName
+                            })
+                        });
+
+                        if (retryRes.ok) {
+                            const data = await retryRes.json();
+                            appState.transcript.push({
+                                role: 'interviewer',
+                                content: data.reply,
+                                focusReason: data.focusReason,
+                                moduleN: data.moduleN
+                            });
+                            appState.questionsAsked = 1;
+                            appState.activeModule = data.moduleN || 1;
+                            if (data.moduleN) {
+                                appState.daysCoveredSet.add(data.moduleN * 3 - 2);
+                                appState.daysCoveredCount = 1;
+                            }
+                            startInterviewTimer();
+                            speakInterviewerText(data.reply);
+                            return;
+                        }
+                    } catch (retryErr) {
+                        console.warn(`Start retry attempt ${attempt} failed:`, retryErr);
+                    }
+                }
+
+                // Personalized fallback greeting including user name
+                const fallbackGreeting = `Welcome ${appState.userName}! Let's begin the technical assessment for ${candidate.member.name} (${candidate.member.jobRole}). Can you explain your experience with ${candidate.missions?.[0]?.title || 'vector search and embeddings'}?`;
                 appState.transcript.push({
                     role: 'interviewer',
-                    content: "Welcome. Let's start the session. Can you describe how you configure Python environments?"
+                    content: fallbackGreeting,
+                    focusReason: candidate.missions?.[0]?.title || "Core Technical Architecture",
+                    moduleN: 1
                 });
+                appState.questionsAsked = 1;
+                appState.activeModule = 1;
                 startInterviewTimer();
-                speakInterviewerText("Welcome. Let's start the session. Can you describe how you configure Python environments?");
+                speakInterviewerText(fallbackGreeting);
             } finally {
                 appState.isTyping = false;
                 render();
