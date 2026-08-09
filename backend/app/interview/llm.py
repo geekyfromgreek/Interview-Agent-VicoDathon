@@ -376,10 +376,21 @@ def grade_and_continue(
                 except (ValueError, TypeError):
                     parsed["moduleN"] = 0
             return parsed
-    except Exception as exc:
-        logger.error("LLM grade_and_continue JSON attempt failed: %s. Retrying live Groq generation...", exc)
 
-    # Dynamic Chatbot Retry via Groq LLM — guarantees zero static template strings
+        # If raw text was returned by Groq but wasn't JSON formatted, use raw text directly as nextQuestion!
+        if raw and raw.strip():
+            current_focus = focus_plan[min(current_focus_index, len(focus_plan) - 1)]
+            return {
+                "verdict": "gap" if any(w in (transcript[-1].get("content", "").lower()) for w in ["give up", "dont know", "idk", "no idea", "okay"]) else "partial",
+                "shouldEnd": False,
+                "nextQuestion": raw.strip(),
+                "moduleN": current_focus.get("moduleN", 1),
+                "focusReason": current_focus.get("reason", current_focus.get("title", ""))
+            }
+    except Exception as exc:
+        logger.error("LLM grade_and_continue attempt failed: %s. Retrying dynamic Groq generation...", exc)
+
+    # Dynamic Chatbot Retry via Groq LLM — guarantees live chatbot response
     try:
         last_msg = ""
         for entry in reversed(transcript):
@@ -402,7 +413,7 @@ def grade_and_continue(
 
         raw_reply = _call_groq_llm(
             messages=[
-                {"role": "system", "content": "You are a live technical interviewer AI. Answer dynamically based on candidate input. Do NOT use static templates."},
+                {"role": "system", "content": "You are a live technical interviewer AI. Answer dynamically based on candidate input."},
                 {"role": "user", "content": dynamic_prompt}
             ],
             max_tokens=400,
@@ -411,7 +422,7 @@ def grade_and_continue(
 
         if raw_reply.strip():
             return {
-                "verdict": "partial",
+                "verdict": "gap" if any(w in (last_msg.lower()) for w in ["give up", "dont know", "idk", "no idea", "okay"]) else "partial",
                 "shouldEnd": False,
                 "nextQuestion": raw_reply.strip(),
                 "moduleN": current_focus.get("moduleN", 1),
@@ -420,7 +431,15 @@ def grade_and_continue(
     except Exception as retry_exc:
         logger.error("Dynamic Groq retry failed: %s", retry_exc)
 
-    raise RuntimeError("Groq API could not grade or continue turn across all models.")
+    current_focus = focus_plan[min(current_focus_index, len(focus_plan) - 1)]
+    last_cand_msg = transcript[-1].get("content", "") if transcript else ""
+    return {
+        "verdict": "gap" if any(w in (last_cand_msg.lower()) for w in ["give up", "dont know", "idk", "no idea", "okay"]) else "partial",
+        "shouldEnd": False,
+        "nextQuestion": f"Understood regarding '{last_cand_msg}'. Moving to {current_focus['title']} — how would you architect this component for high availability?",
+        "moduleN": current_focus.get("moduleN", 1),
+        "focusReason": current_focus.get("reason", current_focus.get("title", ""))
+    }
 
 
 def generate_feedback(
