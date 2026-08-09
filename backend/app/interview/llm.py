@@ -142,11 +142,11 @@ def generate_question(
 
     system_prompt = (
         f"{persona_instruction}\n"
-        f"Greet the candidate as '{user_name}' (e.g. 'Hello {user_name}, let's talk about...').\n"
-        "Ask ONE clear, specific question that tests whether the candidate truly understands "
+        f"CRITICAL MANDATORY GREETING RULE: You MUST start your reply string with 'Hello {user_name}, ...' or 'Welcome {user_name}, ...'. NEVER omit candidate name '{user_name}' from the opening sentence.\n"
+        "Ask ONE clear, specific technical question that tests whether the candidate truly understands "
         "the topic — not a yes/no question. Personalise the question to their role.\n\n"
         "You MUST respond with a JSON object and nothing else:\n"
-        '{"reply": "<your question>", "moduleN": <int>, "focusReason": "<short reason>"}'
+        '{"reply": "<your question starting with Hello {user_name}>", "moduleN": <int>, "focusReason": "<short reason>"}'
     )
 
     user_prompt = (
