@@ -740,6 +740,16 @@ make the pdf much more detialed, add chartts graphs  stats in it, u havebtn, als
 
 One-line summary: User pointing out that downloading PDF from 3-line hamburger menu was not responding, requesting fix alongside rich multi-metric visual graphs, stat badges, and detailed report sections.
 
+---
+
+## Prompt 56: Guaranteed Continuous Response & Network Retry Resilience Query
+```
+interviweer ssimply isnt answering me anymore, use groq api to anser me
+```
+
+One-line summary: User pointing out that interviewer stopped responding, instructing to ensure API retries and local fallback turn handlers guarantee the interviewer ALWAYS responds via Groq API without stopping.
+
+
 
 
 

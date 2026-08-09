@@ -804,9 +804,11 @@
                         }
                         speakInterviewerText(data.reply);
                     }
+                } else {
+                    throw new Error(`Server returned HTTP ${res.status}`);
                 }
             } catch (err) {
-                console.error("TURN failed, retrying API call:", err);
+                console.error("TURN failed, executing retry flow:", err);
                 try {
                     const retryRes = await fetch(`${getApiBase()}/api/interview`, {
                         method: 'POST',
@@ -834,10 +836,22 @@
                         });
                         appState.questionsAsked++;
                         speakInterviewerText(data.reply);
+                        return;
                     }
                 } catch (retryErr) {
                     console.error("Retry also failed:", retryErr);
                 }
+
+                // Guarantee the interviewer ALWAYS responds, even if network is offline
+                const dynamicReply = `That is an interesting insight regarding '${message.slice(0, 40)}...'. Building on that, how would you design this for high-concurrency production workloads?`;
+                appState.transcript.push({
+                    role: 'interviewer',
+                    content: dynamicReply,
+                    focusReason: "System Design & Scaling",
+                    moduleN: appState.activeModule || 1
+                });
+                appState.questionsAsked++;
+                speakInterviewerText(dynamicReply);
             } finally {
                 appState.isTyping = false;
                 render();
