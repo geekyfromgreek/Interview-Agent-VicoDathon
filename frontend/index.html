@@ -651,6 +651,13 @@
                 
                 history.push(record);
                 localStorage.setItem('interviewiq_history', JSON.stringify(history));
+
+                // Sync persistently to backend SQLite DB
+                fetch(`${getApiBase()}/api/history`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...record, transcript })
+                }).catch(e => console.log("Backend history sync:", e));
             } catch (err) {
                 console.error("Failed to save history:", err);
             }

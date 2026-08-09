@@ -101,6 +101,19 @@ async def get_curriculum():
     return CURRICULUM
 
 
+@app.get("/api/history")
+async def get_history():
+    """Retrieve all persistent candidate interview session records."""
+    return db_store.get_all_history()
+
+
+@app.post("/api/history")
+async def save_history(record: dict):
+    """Save or update a candidate interview session record in persistent SQLite DB."""
+    db_store.save_interview_history(record)
+    return {"status": "success", "message": "Interview session saved persistently"}
+
+
 # ─── START Flow ──────────────────────────────────────────────────────
 
 def _handle_start(req: InterviewRequest) -> InterviewResponse:
@@ -275,6 +288,21 @@ def _end_interview(
         gaps=feedback_data.get("gaps", []),
         next=feedback_data.get("next", []),
     )
+
+    # Persist completed interview session to SQLite DB
+    try:
+        import datetime
+        db_store.save_interview_history({
+            "id": getattr(session, "session_id", "session_" + str(os.urandom(4).hex())),
+            "userName": session.user_name,
+            "candidateRole": candidate_role,
+            "persona": session.persona,
+            "date": datetime.date.today().isoformat(),
+            "feedback": feedback_data,
+            "transcript": session.transcript,
+        })
+    except Exception as exc:
+        logger.error("Failed to auto-persist completed session: %s", exc)
 
     return InterviewResponse(
         reply="Interview completed.",
