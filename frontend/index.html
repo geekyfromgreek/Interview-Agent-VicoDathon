@@ -323,7 +323,7 @@
             activeModule: 1,
             isTyping: false,
             feedback: null,
-            activeEngineeringSection: 'ai_ml',
+            activeEngineeringSection: 'ai_rag',
             selectedPersona: 'Pragmatic Architect',
             showConfigPanel: false,
             userName: localStorage.getItem('interviewiq_user_name') || '',
@@ -388,18 +388,20 @@
             render();
         }
 
-        function getEngineeringSection(role) {
-            const r = role.toLowerCase();
-            if (r.includes('ai') || r.includes('artificial intelligence') || r.includes('machine learning')) {
-                return 'ai_ml';
+        function getEngineeringSection(role, cand) {
+            const r = (role || '').toLowerCase();
+            const missionsStr = cand && cand.missions ? cand.missions.map(m => (m.title || '').toLowerCase()).join(' ') : '';
+            
+            if (missionsStr.includes('mcp') || missionsStr.includes('agent') || missionsStr.includes('langchain') || r.includes('architect') || r.includes('principal')) {
+                return 'agentic_mcp';
             }
-            if (r.includes('data') || r.includes('backend') || r.includes('software engineer') || r.includes('developer') || r.includes('mobile')) {
-                return 'backend_data';
+            if (missionsStr.includes('docker') || missionsStr.includes('kubernetes') || missionsStr.includes('monitoring') || r.includes('devops') || r.includes('legacy') || r.includes('support')) {
+                return 'devops_capstone';
             }
-            if (r.includes('devops') || r.includes('system') || r.includes('support') || r.includes('intern') || r.includes('distinguished')) {
-                return 'devops_systems';
+            if (r.includes('data') || missionsStr.includes('embeddings') || missionsStr.includes('vector') || missionsStr.includes('rag') || r.includes('analyst') || r.includes('ai engineer')) {
+                return 'ai_rag';
             }
-            return 'product_other';
+            return 'fullstack_api';
         }
 
         // Hamburger Menu Controls
@@ -1045,7 +1047,7 @@
             
             // Filter candidates by active tab
             const filteredCandidates = appState.candidates.filter(cand => {
-                return getEngineeringSection(cand.member.jobRole) === appState.activeEngineeringSection;
+                return getEngineeringSection(cand.member.jobRole, cand) === appState.activeEngineeringSection;
             });
 
             if (filteredCandidates.length === 0) {
@@ -1084,13 +1086,13 @@
                 });
             }
 
-            // Tab Buttons
+            // Tab Buttons (Grouped by Cohort Curriculum Subjects)
             const tabsHtml = `
                 <div class="flex flex-wrap border-b border-border-subtle mb-6 gap-2">
-                    <button class="px-4 py-2 font-bold transition-all border-b-2 ${appState.activeEngineeringSection === 'ai_ml' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}" onclick="setEngineeringSection('ai_ml')">AI & ML Engineering</button>
-                    <button class="px-4 py-2 font-bold transition-all border-b-2 ${appState.activeEngineeringSection === 'backend_data' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}" onclick="setEngineeringSection('backend_data')">Backend & Data</button>
-                    <button class="px-4 py-2 font-bold transition-all border-b-2 ${appState.activeEngineeringSection === 'devops_systems' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}" onclick="setEngineeringSection('devops_systems')">Systems & DevOps</button>
-                    <button class="px-4 py-2 font-bold transition-all border-b-2 ${appState.activeEngineeringSection === 'product_other' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}" onclick="setEngineeringSection('product_other')">Product & Design</button>
+                    <button class="px-4 py-2 font-bold transition-all border-b-2 ${appState.activeEngineeringSection === 'ai_rag' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}" onclick="setEngineeringSection('ai_rag')">Embeddings, RAG & Vector Search</button>
+                    <button class="px-4 py-2 font-bold transition-all border-b-2 ${appState.activeEngineeringSection === 'agentic_mcp' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}" onclick="setEngineeringSection('agentic_mcp')">Agentic AI & MCP Protocol</button>
+                    <button class="px-4 py-2 font-bold transition-all border-b-2 ${appState.activeEngineeringSection === 'fullstack_api' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}" onclick="setEngineeringSection('fullstack_api')">Chatbot APIs & Full-Stack</button>
+                    <button class="px-4 py-2 font-bold transition-all border-b-2 ${appState.activeEngineeringSection === 'devops_capstone' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}" onclick="setEngineeringSection('devops_capstone')">DevOps & Cloud Systems</button>
                 </div>
             `;
 
@@ -1263,39 +1265,39 @@
         }
 
         function renderWhereIExcel() {
-            let totalMissions = { ai_ml: 0, backend_data: 0, devops_systems: 0, product_other: 0 };
-            let passedMissions = { ai_ml: 0, backend_data: 0, devops_systems: 0, product_other: 0 };
+            let totalMissions = { ai_rag: 0, agentic_mcp: 0, fullstack_api: 0, devops_capstone: 0 };
+            let passedMissions = { ai_rag: 0, agentic_mcp: 0, fullstack_api: 0, devops_capstone: 0 };
             
             (appState.candidates || []).forEach(cand => {
-                const sect = getEngineeringSection(cand.member.jobRole);
+                const sect = getEngineeringSection(cand.member.jobRole, cand);
                 (cand.missions || []).forEach(m => {
-                    totalMissions[sect]++;
-                    if (m.passed) passedMissions[sect]++;
+                    if (totalMissions[sect] !== undefined) totalMissions[sect]++;
+                    if (m.passed && passedMissions[sect] !== undefined) passedMissions[sect]++;
                 });
             });
             
             let aiBase = 92;
-            let backendBase = 84;
-            let devopsBase = 71;
-            let productBase = 65;
+            let agenticBase = 88;
+            let fullstackBase = 84;
+            let devopsBase = 76;
 
             (appState.candidates || []).forEach(cand => {
-                const sect = getEngineeringSection(cand.member.jobRole);
+                const sect = getEngineeringSection(cand.member.jobRole, cand);
                 (cand.missions || []).forEach(m => {
                     if (m.passed) {
-                        if (sect === 'ai_ml') aiBase = Math.min(98, aiBase + 1);
-                        if (sect === 'backend_data') backendBase = Math.min(95, backendBase + 1);
-                        if (sect === 'devops_systems') devopsBase = Math.min(90, devopsBase + 1);
-                        if (sect === 'product_other') productBase = Math.min(88, productBase + 1);
+                        if (sect === 'ai_rag') aiBase = Math.min(98, aiBase + 1);
+                        if (sect === 'agentic_mcp') agenticBase = Math.min(96, agenticBase + 1);
+                        if (sect === 'fullstack_api') fullstackBase = Math.min(94, fullstackBase + 1);
+                        if (sect === 'devops_capstone') devopsBase = Math.min(90, devopsBase + 1);
                     }
                 });
             });
 
             const domains = [
-                { id: 'AI & Machine Learning', score: aiBase, desc: 'Advanced LLM prompt tuning, Vector DB embeddings, and RAG retrieval pipelines.' },
-                { id: 'Backend & Data Systems', score: backendBase, desc: 'Vector database schemas, relational indexing, memory management, and scalable APIs.' },
-                { id: 'Systems & DevOps', score: devopsBase, desc: 'Model Context Protocol (MCP) integrations, CI/CD pipeline automation, and container orchestration.' },
-                { id: 'Product & Technical Design', score: productBase, desc: 'Technical specifications, UX system maps, trade-off documentations, and product-led design flows.' }
+                { id: 'Embeddings, RAG & Vector Search', score: aiBase, desc: 'Advanced vector embeddings, semantic retrieval, ChromaDB/Pinecone indexing, and grounded RAG pipelines.' },
+                { id: 'Agentic AI & MCP Protocol', score: agenticBase, desc: 'ReAct agentic reasoning, LangChain tools, multi-agent CrewAI orchestration, and Model Context Protocol (MCP) servers.' },
+                { id: 'Chatbot APIs & Full-Stack', score: fullstackBase, desc: 'FastAPI chatbot endpoints, streaming responses (SSE), function calling, Pydantic validation, and interactive UI.' },
+                { id: 'DevOps & Cloud Systems', score: devopsBase, desc: 'Containerization with Docker, Kubernetes orchestration, CI/CD automation, monitoring, and security guardrails.' }
             ];
             
             domains.sort((a, b) => b.score - a.score);
