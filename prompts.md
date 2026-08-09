@@ -686,6 +686,16 @@ it syas pdf but doenloads md file, seems issue on backend , make it a downloadab
 
 One-line summary: User pointing out that report downloads were outputting Markdown files instead of genuine PDF files, requesting all export triggers to download formatted PDF files with score graphs.
 
+---
+
+## Prompt 50: Fallback String Elimination & Seamless Session Restoration Query
+```
+no matter what i ask it says previous arhctiecutral choices, it wrong ,use qgroq api to answer each question ,do not use any pre stored asnwers
+```
+
+One-line summary: User pointing out repetitive static fallback string 'Could you expand on your previous architectural choices', instructing to eliminate hardcoded fallbacks and enforce seamless Groq LLM response generation for every question.
+
+
 
 
 

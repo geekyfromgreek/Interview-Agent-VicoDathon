@@ -157,14 +157,13 @@ def _handle_turn(req: InterviewRequest) -> InterviewResponse:
     session_id = req.sessionId
     message = req.message  # type: ignore[assignment]
 
-    # 1. Check session exists
+    # 1. Check session exists or restore seamlessly
     session = get_session(session_id)
     if session is None:
-        return InterviewResponse(
-            reply="This session has expired — please restart the interview.",
-            done=True,
-            feedback=None,
-        )
+        logger.info("Session %s not found in memory, restoring dynamically...", session_id)
+        default_candidate = CANDIDATES[0]
+        focus_plan = build_focus_plan(default_candidate)
+        session = create_session(session_id, default_candidate, focus_plan, persona="Pragmatic Architect", user_name="Candidate")
 
     logger.info("TURN  session=%s  question#=%d  message_len=%d",
                 session_id, session.questions_asked, len(message))
@@ -213,11 +212,15 @@ def _handle_turn(req: InterviewRequest) -> InterviewResponse:
 
     next_question = grading.get("nextQuestion")
     if not next_question:
-        if session.current_focus_index < len(session.focus_plan):
-            curr_topic = session.focus_plan[session.current_focus_index]
-            next_question = f"Let's move forward — regarding {curr_topic['title']}, how would you approach this in production?"
-        else:
-            next_question = "Reflecting on your learning journey overall, what was the most important engineering trade-off you evaluated?"
+        curr_topic = session.focus_plan[min(session.current_focus_index, len(session.focus_plan) - 1)]
+        res_q = llm.generate_question(
+            candidate_name=candidate_name,
+            candidate_role=candidate_role,
+            focus_area=curr_topic,
+            persona=session.persona,
+            user_name=session.user_name
+        )
+        next_question = res_q["reply"]
 
     next_moduleN = grading.get("moduleN", 0)
     next_focusReason = grading.get("focusReason", "")

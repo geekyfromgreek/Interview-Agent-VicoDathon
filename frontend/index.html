@@ -806,11 +806,38 @@
                     }
                 }
             } catch (err) {
-                console.error("TURN failed:", err);
-                appState.transcript.push({
-                    role: 'interviewer',
-                    content: "Could you expand on your previous architectural choices?"
-                });
+                console.error("TURN failed, retrying API call:", err);
+                try {
+                    const retryRes = await fetch(`${getApiBase()}/api/interview`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            sessionId: appState.sessionId,
+                            message: message
+                        })
+                    });
+                    if (retryRes.ok) {
+                        const data = await retryRes.json();
+                        if (data.verdict) appState.transcript[appState.transcript.length - 1].verdict = data.verdict;
+                        if (data.done) {
+                            stopInterviewTimer();
+                            appState.feedback = data.feedback;
+                            saveInterviewSessionToHistory(appState.userName, appState.selectedCandidate, appState.selectedPersona, data.feedback, appState.transcript);
+                            navigateTo('feedback_report');
+                            return;
+                        }
+                        appState.transcript.push({
+                            role: 'interviewer',
+                            content: data.reply,
+                            focusReason: data.focusReason,
+                            moduleN: data.moduleN
+                        });
+                        appState.questionsAsked++;
+                        speakInterviewerText(data.reply);
+                    }
+                } catch (retryErr) {
+                    console.error("Retry also failed:", retryErr);
+                }
             } finally {
                 appState.isTyping = false;
                 render();
