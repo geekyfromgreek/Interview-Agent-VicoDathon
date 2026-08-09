@@ -521,22 +521,12 @@ One-line summary: User noting Railway's $5 trial limit and requesting a 100% fre
 
 ---
 
-## Prompt 30: Railway Secret Groq Build Error Query
+## Prompt 31: Railway Variable Name Space Fix Query
 ```
-  [1mDeploy[0m    
-  [38;5;238m──────────[0m
-    [38;5;245m$[0m [1muvicorn backend.app.main:app --host 0.0.0.0 --port $PORT[0m
-
-load build definition from ./railpack-plan.json
-
-
-install mise packages: python
-
-
-Build Failed: build daemon returned an error < failed to solve: secret groq not found >
+[Screenshot showing Railway Service Variable named 'groq api key']
 ```
 
-One-line summary: User sharing Railway build error regarding missing secret `groq` reference in environment variables.
+One-line summary: User sharing screenshot showing environment variable named 'groq api key' instead of 'LLM_API_KEY'.
 
 
 
