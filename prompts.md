@@ -599,6 +599,16 @@ One-line summary: User reporting candidate loading delay on Vercel frontend due 
 
 One-line summary: User requesting instructions to rename Render URL, 3D model preloading optimization, and changing candidate selection menu text to 'Select Interviewer'.
 
+---
+
+## Prompt 40: Vercel & Render Differing URLs Confirmation
+```
+botj arr diff
+```
+
+One-line summary: User sharing screenshots showing Vercel frontend URL ('interview-agent-vicodathon.vercel.app') and Render backend URL ('interviewiq-api.onrender.com').
+
+
 
 
 
