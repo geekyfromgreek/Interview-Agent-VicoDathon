@@ -189,6 +189,10 @@
                     <span class="material-symbols-outlined text-primary">download</span>
                     Download Last Report
                 </button>
+                <button class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container text-left font-bold text-sm text-on-surface w-full transition-colors" onclick="promptBackendUrl()">
+                    <span class="material-symbols-outlined text-primary">link</span>
+                    Set Backend URL
+                </button>
             </nav>
             
             <!-- Drawer Footer -->
@@ -215,13 +219,60 @@
 
     <!-- Main Logic Script -->
     <script>
-        const API_BASE = (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('github.io'))
-            ? 'https://interviewiq-api.onrender.com' // Replace with your Render backend URL if deploying frontend on Vercel
-            : window.location.origin;
-        
+        function getApiBase() {
+            const savedUrl = localStorage.getItem('interviewiq_backend_url');
+            if (savedUrl && savedUrl.trim()) {
+                return savedUrl.trim().replace(/\/+$/, '');
+            }
+            if (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('github.io')) {
+                return 'https://interviewiq-api.onrender.com';
+            }
+            return window.location.origin;
+        }
+
+        function promptBackendUrl() {
+            const current = localStorage.getItem('interviewiq_backend_url') || getApiBase();
+            const input = prompt("Enter your Render Backend URL (e.g. https://your-backend.onrender.com):", current);
+            if (input !== null) {
+                const clean = input.trim().replace(/\/+$/, '');
+                if (clean) {
+                    localStorage.setItem('interviewiq_backend_url', clean);
+                    alert("Backend URL saved! Reloading candidates...");
+                    fetchCandidates().then(() => render());
+                } else {
+                    localStorage.removeItem('interviewiq_backend_url');
+                    alert("Backend URL reset to auto-detect.");
+                    fetchCandidates().then(() => render());
+                }
+            }
+        }
+
+        const FALLBACK_CANDIDATES = [
+            { member: { id: "CAND-001", name: "Sarah Johnson", jobRole: "Senior Data Engineer", yearsExperience: 9, education: "MS Computer Science", status: "COMPLETED" }, missions: [ { day: 7, title: "Embeddings Explained", passed: true }, { day: 8, title: "Vector Databases Overview", passed: true }, { day: 10, title: "Retrieval & Matching Engine", passed: true }, { day: 12, title: "Prompt Engineering Fundamentals", passed: true }, { day: 23, title: "Model Context Protocol (MCP)", passed: true } ] },
+            { member: { id: "CAND-002", name: "Alex Turner", jobRole: "Backend Software Engineer", yearsExperience: 5, education: "B.Tech Computer Science", status: "COMPLETED" }, missions: [ { day: 7, title: "Embeddings Explained", passed: true }, { day: 8, title: "Vector Databases Overview", passed: true }, { day: 10, title: "Retrieval Engine", passed: true }, { day: 16, title: "API Integration", passed: true } ] },
+            { member: { id: "CAND-003", name: "Emily Chen", jobRole: "AI Engineer", yearsExperience: 6, education: "MS Artificial Intelligence", status: "COMPLETED" }, missions: [ { day: 7, title: "Embeddings Explained", passed: true }, { day: 8, title: "Vector Databases Overview", passed: true }, { day: 11, title: "RAG End-to-End", passed: true }, { day: 22, title: "Multi-Agent Orchestration", passed: true }, { day: 23, title: "MCP Protocol", passed: true } ] },
+            { member: { id: "CAND-004", name: "David Miller", jobRole: "Business Analyst", yearsExperience: 8, education: "MBA", status: "COMPLETED" }, missions: [ { day: 7, title: "Embeddings Explained", passed: true }, { day: 12, title: "Prompt Engineering", passed: true } ] },
+            { member: { id: "CAND-005", name: "Michael Brown", jobRole: "DevOps Engineer", yearsExperience: 10, education: "B.Tech IT", status: "COMPLETED" }, missions: [ { day: 28, title: "Docker & Kubernetes Deployment", passed: true }, { day: 29, title: "Monitoring & Observability", passed: true } ] },
+            { member: { id: "CAND-006", name: "Wendy Foster", jobRole: "Marketing Manager", yearsExperience: 12, education: "BA Marketing", status: "COMPLETED" }, missions: [ { day: 1, title: "Python Setup", passed: true }, { day: 17, title: "Chatbot Frontend", passed: true } ] },
+            { member: { id: "CAND-007", name: "Ethan Brooks", jobRole: "Computer Science Intern", yearsExperience: 0, education: "BS Computer Science", status: "COMPLETED" }, missions: [ { day: 1, title: "Python Setup", passed: true }, { day: 7, title: "Embeddings", passed: true } ] },
+            { member: { id: "CAND-008", name: "Harold Whitfield", jobRole: "Distinguished Engineer", yearsExperience: 28, education: "BS Computer Science", status: "COMPLETED" }, missions: [ { day: 21, title: "LangChain Agents", passed: true }, { day: 23, title: "MCP Protocol", passed: true } ] },
+            { member: { id: "CAND-009", name: "Zara Ahmadi", jobRole: "AI Engineer", yearsExperience: 1, education: "BS Computer Science", status: "COMPLETED" }, missions: [ { day: 7, title: "Embeddings", passed: true }, { day: 22, title: "Multi-Agent Orchestration", passed: true } ] },
+            { member: { id: "CAND-010", name: "Gerald Combs", jobRole: "IT Support Specialist", yearsExperience: 20, education: "AAS IT", status: "COMPLETED" }, missions: [ { day: 1, title: "Python Setup", passed: true } ] },
+            { member: { id: "CAND-011", name: "Mia Alvarez", jobRole: "UX Researcher", yearsExperience: 6, education: "MA HCI", status: "COMPLETED" }, missions: [ { day: 3, title: "React Frontend", passed: true } ] },
+            { member: { id: "CAND-012", name: "Chen Wei", jobRole: "Mobile App Developer", yearsExperience: 7, education: "BS Computer Engineering", status: "COMPLETED" }, missions: [ { day: 8, title: "Vector DBs", passed: true }, { day: 18, title: "Streaming Responses", passed: true } ] },
+            { member: { id: "CAND-013", name: "Ravi Patel", jobRole: "Software Engineer", yearsExperience: 15, education: "MS Computer Science", status: "COMPLETED" }, missions: [ { day: 7, title: "Embeddings", passed: true }, { day: 28, title: "Docker Deployment", passed: true } ] },
+            { member: { id: "CAND-014", name: "Bethany Cole", jobRole: "HR Manager", yearsExperience: 10, education: "BA HR", status: "COMPLETED" }, missions: [ { day: 12, title: "Prompt Engineering", passed: true } ] },
+            { member: { id: "CAND-015", name: "Noah Kim", jobRole: "Principal Architect", yearsExperience: 20, education: "MS Computer Science", status: "COMPLETED" }, missions: [ { day: 22, title: "Multi-Agent Orchestration", passed: true }, { day: 23, title: "MCP Protocol", passed: true } ] },
+            { member: { id: "CAND-016", name: "Isabella Rossi", jobRole: "Software Engineer", yearsExperience: 5, education: "BS Computer Science", status: "COMPLETED" }, missions: [ { day: 8, title: "Vector DBs", passed: true } ] },
+            { member: { id: "CAND-017", name: "Tyler Brooks", jobRole: "Junior Developer", yearsExperience: 0, education: "Coding Bootcamp", status: "COMPLETED" }, missions: [ { day: 1, title: "Python Setup", passed: true }, { day: 7, title: "Embeddings", passed: true } ] },
+            { member: { id: "CAND-018", name: "Diane Foster", jobRole: "AI Engineer", yearsExperience: 4, education: "MS Computer Science", status: "COMPLETED" }, missions: [ { day: 7, title: "Embeddings", passed: true }, { day: 23, title: "MCP Protocol", passed: true } ] },
+            { member: { id: "CAND-019", name: "Frank DeLuca", jobRole: "Legacy Systems Engineer", yearsExperience: 25, education: "BS Computer Science", status: "COMPLETED" }, missions: [ { day: 16, title: "API Integration", passed: true } ] },
+            { member: { id: "CAND-020", name: "Priyanka Sharma", jobRole: "Software Engineer", yearsExperience: 5, education: "BS Computer Science", status: "COMPLETED" }, missions: [ { day: 12, title: "Prompt Engineering", passed: true } ] }
+        ];
+
         let appState = {
             currentScreen: 'landing',
-            candidates: [],
+            candidates: FALLBACK_CANDIDATES,
             selectedCandidate: null,
             sessionId: '',
             transcript: [], // { role, content, focusReason, moduleN, verdict }
@@ -245,13 +296,15 @@
 
         async function fetchCandidates() {
             try {
-                const res = await fetch(`${API_BASE}/api/candidates`);
+                const res = await fetch(`${getApiBase()}/api/candidates`);
                 if (res.ok) {
                     const data = await res.json();
-                    appState.candidates = data.candidates || [];
+                    if (data.candidates && data.candidates.length > 0) {
+                        appState.candidates = data.candidates;
+                    }
                 }
             } catch (err) {
-                console.error("Failed to fetch candidates:", err);
+                console.error("Failed to fetch candidates from API, using fallback data:", err);
             }
         }
 
@@ -452,7 +505,7 @@
             navigateTo('interview_interface');
 
             try {
-                const res = await fetch(`${API_BASE}/api/interview`, {
+                const res = await fetch(`${getApiBase()}/api/interview`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -514,7 +567,7 @@
             scrollChat();
 
             try {
-                const res = await fetch(`${API_BASE}/api/interview`, {
+                const res = await fetch(`${getApiBase()}/api/interview`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -573,7 +626,7 @@
 
             try {
                 // Send dummy message or call directly to get summary
-                const res = await fetch(`${API_BASE}/api/interview`, {
+                const res = await fetch(`${getApiBase()}/api/interview`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

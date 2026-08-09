@@ -581,6 +581,16 @@ demo is online
 
 One-line summary: User confirming that the live production demo is online and ready.
 
+---
+
+## Prompt 38: Candidate Fallback & Custom Backend URL Resolution Query
+```
+ been 2 minutes
+```
+
+One-line summary: User reporting candidate loading delay on Vercel frontend due to cross-domain placeholder backend URL resolution or Render cold start.
+
+
 
 
 
