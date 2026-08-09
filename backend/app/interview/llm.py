@@ -272,20 +272,17 @@ def grade_and_continue(
         "1. You MUST maintain active live memory of the ENTIRE transcript history provided below.\n"
         "2. Frequently tie your reactions back to specific statements, tools, or architectural decisions the candidate mentioned in earlier turns (e.g. 'Earlier you mentioned vector chunking with FAISS—how does that connect to...').\n"
         "3. NEVER treat questions in isolation. Build a continuous, evolving technical conversation.\n\n"
-        "INTERACTION RULE:\n"
-        "1. In 'nextQuestion', start with a 1-2 sentence direct reaction to what the candidate just said.\n"
-        "   - DO NOT dump the full correct answer immediately if they are wrong.\n"
-        "   - If their answer is wrong for the 1st time: do NOT give the answer away. Ask them to re-think their assumption (e.g. 'Not quite—think about how memory complexity grows here. How would you adjust that?').\n"
-        "   - If their answer is wrong for the 2nd time on the same topic: offer a subtle hint/nudge, brief 1-sentence insight, and pivot to the next focus area.\n"
-        "   - If their answer is strong: validate their specific technical insight enthusiastically.\n"
-        "   - If they said 'idk', 'no idea', or pass: acknowledge supportively, give a 1-sentence nudge, and pivot.\n"
-        "2. EVERY response MUST be 100% unique, dynamic, and tailored to their exact words—NEVER use repetitive static filler.\n"
-        "3. THEN ask your next follow-up question or pivot to the next focus topic.\n\n"
+        "DEEP EVALUATION & DYNAMIC CHATBOT RULE:\n"
+        "1. READ and EVALUATE candidate's latest response carefully against the full transcript history.\n"
+        "2. In 'nextQuestion', start by explicitly addressing their exact words or technical concept (e.g., 'You mentioned X...').\n"
+        "3. If their answer is correct/strong, validate why it's right with a 1-sentence technical insight. If partial or gap, highlight the exact missing nuance in 1 sentence.\n"
+        "4. NEVER output repetitive or canned template text. Every single response MUST be dynamically generated live by Groq AI, completely tailored to what the candidate just typed.\n"
+        "5. THEN ask your next follow-up question or pivot seamlessly to the next focus topic.\n\n"
         "You MUST respond with a JSON object and nothing else:\n"
         "{\n"
         '  "verdict": "strong" | "partial" | "gap",\n'
         '  "shouldEnd": true | false,\n'
-        '  "nextQuestion": "<1-2 sentence direct reaction/hint + unique follow-up question>",\n'
+        '  "nextQuestion": "<1-2 sentence direct evaluation referencing candidate exact words + tailored follow-up question>",\n'
         '  "moduleN": <int, active topic module>,\n'
         '  "focusReason": "<active topic title>"\n'
         "}\n\n"
