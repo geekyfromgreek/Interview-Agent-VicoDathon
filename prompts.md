@@ -590,6 +590,16 @@ One-line summary: User confirming that the live production demo is online and re
 
 One-line summary: User reporting candidate loading delay on Vercel frontend due to cross-domain placeholder backend URL resolution or Render cold start.
 
+---
+
+## Prompt 39: Render URL Customization, 3D Model Optimization & Terminology Fix Query
+```
+ the render link is ddiffrent how to rename or change  it 3d model takes a lot of time to load ,try to rrduce it , in menu it the user is a candiate right:? not the interviwer so ti should be select interviewer
+```
+
+One-line summary: User requesting instructions to rename Render URL, 3D model preloading optimization, and changing candidate selection menu text to 'Select Interviewer'.
+
+
 
 
 

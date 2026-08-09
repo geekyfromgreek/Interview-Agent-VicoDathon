@@ -8,6 +8,7 @@
     <!-- Scripts & Tailwind CSS Config -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+    <link rel="preload" href="coding.glb" as="fetch" crossorigin="anonymous"/>
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     
@@ -145,22 +146,20 @@
                 <span class="material-symbols-outlined text-primary text-xl">terminal</span>
                 <span class="font-label-caps text-label-caps tracking-widest text-on-surface">interviewIQ</span>
             </div>
-        </div>
-        <div class="flex items-center gap-stack-md">
+        </div>        <div class="flex items-center gap-stack-md">
             <span id="header-candidate-badge" class="hidden font-body-md text-body-md text-on-surface font-bold bg-surface-gray border border-border-subtle px-3 py-1 rounded"></span>
-            <button id="header-cta-btn" class="bg-primary-container text-on-primary font-body-md px-4 py-2 rounded-lg font-bold hover:bg-surface-tint active:scale-95 duration-150 transition-colors" onclick="navigateTo('candidate_select')">Start Interview</button>
+            <button id="header-cta-btn" class="bg-primary-container text-on-primary font-body-md px-4 py-2 rounded-lg font-bold hover:bg-surface-tint active:scale-95 duration-150 transition-colors" onclick="navigateTo('candidate_select')">Select Interviewer</button>
         </div>
     </header>
 
     <!-- Slide-over Menu Drawer Overlay -->
-    <div id="menu-drawer-overlay" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden transition-opacity duration-300 opacity-0" onclick="toggleMenu()">
-        <!-- Drawer Panel -->
-        <div id="menu-drawer-panel" class="absolute left-0 top-0 h-full w-[280px] bg-surface border-r border-border-subtle shadow-2xl flex flex-col transition-transform duration-300 transform -translate-x-full" onclick="event.stopPropagation()">
+    <div id="menu-drawer-overlay" class="fixed inset-0 bg-black/40 z-50 hidden opacity-0 transition-opacity duration-300">
+        <div id="menu-drawer-panel" class="fixed inset-y-0 left-0 w-72 bg-surface border-r border-border-subtle shadow-2xl flex flex-col transform -translate-x-full transition-transform duration-300 ease-out z-50">
             <!-- Drawer Header -->
-            <div class="flex items-center justify-between p-4 border-b border-border-subtle h-14">
+            <div class="p-4 border-b border-border-subtle flex items-center justify-between bg-surface-gray">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary text-xl">terminal</span>
-                    <span class="font-label-caps text-label-caps tracking-widest text-on-surface">interviewIQ</span>
+                    <span class="font-bold text-on-surface">interviewIQ</span>
                 </div>
                 <button class="p-1 rounded hover:bg-surface-container flex items-center justify-center" onclick="toggleMenu()">
                     <span class="material-symbols-outlined text-xl">close</span>
@@ -175,7 +174,7 @@
                 </button>
                 <button class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container text-left font-bold text-sm text-on-surface w-full transition-colors" onclick="navigateTo('candidate_select')">
                     <span class="material-symbols-outlined text-primary">person_add</span>
-                    Select Candidate
+                    Select Interviewer
                 </button>
                 <button class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container text-left font-bold text-sm text-on-surface w-full transition-colors" onclick="navigateTo('overall_progress')">
                     <span class="material-symbols-outlined text-primary">analytics</span>
@@ -862,8 +861,8 @@
             return `
                 <main class="max-w-4xl mx-auto px-margin-mobile md:px-stack-lg py-stack-lg min-h-[75vh]">
                     <div class="mb-6">
-                        <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-base">Select Candidate</h1>
-                        <p class="font-body-md text-body-md text-on-surface-variant">Choose a candidate profile to customize their technical interview parameters based on their mission completions.</p>
+                        <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-base">Select Interviewer Profile</h1>
+                        <p class="font-body-md text-body-md text-on-surface-variant">Choose an interviewer candidate profile to customize your technical assessment parameters based on curriculum missions.</p>
                     </div>
                     
                     <!-- Engineering Tab Sections -->
