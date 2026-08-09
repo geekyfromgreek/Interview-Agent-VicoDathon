@@ -215,7 +215,9 @@
 
     <!-- Main Logic Script -->
     <script>
-        const API_BASE = window.location.origin;
+        const API_BASE = (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('github.io'))
+            ? 'https://interviewiq-api.onrender.com' // Replace with your Render backend URL if deploying frontend on Vercel
+            : window.location.origin;
         
         let appState = {
             currentScreen: 'landing',

@@ -554,6 +554,16 @@ ill do render
 
 One-line summary: User deciding to deploy on Render.com and requesting the complete step-by-step setup guide.
 
+---
+
+## Prompt 35: Render + Vercel Split Deployment Query
+```
+render+vercel
+```
+
+One-line summary: User requesting instructions to split deployment between Render (Python backend API) and Vercel (static frontend hosting).
+
+
 
 
 
