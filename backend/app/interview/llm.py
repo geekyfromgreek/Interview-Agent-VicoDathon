@@ -184,13 +184,32 @@ def generate_question(
                 "focusReason": focus_area["reason"],
             }
     except Exception as exc:
-        logger.error("LLM generate_question failed: %s", exc)
+        logger.error("LLM generate_question failed on initial try: %s. Retrying live Groq call...", exc)
 
-    return {
-        "reply": f"Welcome {user_name}! Let's discuss {focus_area['title']}. How have you applied {focus_area.get('tools', ['this topic'])[0]} in your production projects?",
-        "moduleN": focus_area["moduleN"],
-        "focusReason": focus_area["reason"],
-    }
+    # Secondary Groq call with direct text prompt to guarantee 100% LLM output
+    for model_name in GROQ_MODELS:
+        try:
+            client = _get_client()
+            resp = client.chat.completions.create(
+                model=model_name,
+                messages=[
+                    {"role": "system", "content": persona_instruction},
+                    {"role": "user", "content": f"Greet {user_name} as a technical interviewer and ask a creative question testing their knowledge of {focus_area['title']} ({', '.join(focus_area.get('tools', []))})."}
+                ],
+                max_tokens=400,
+                temperature=0.8
+            )
+            text = resp.choices[0].message.content or ""
+            if text.strip():
+                return {
+                    "reply": text.strip(),
+                    "moduleN": focus_area["moduleN"],
+                    "focusReason": focus_area["reason"],
+                }
+        except Exception as retry_err:
+            logger.warning("Secondary Groq model %s failed: %s", model_name, retry_err)
+
+    raise RuntimeError("Groq API could not generate question across all models.")
 
 
 def grade_and_continue(
@@ -401,14 +420,7 @@ def grade_and_continue(
     except Exception as retry_exc:
         logger.error("Dynamic Groq retry failed: %s", retry_exc)
 
-    current_focus = focus_plan[min(current_focus_index, len(focus_plan) - 1)]
-    return {
-        "verdict": "partial",
-        "shouldEnd": False,
-        "nextQuestion": f"Regarding {current_focus['title']} — how would you practically implement this in your production backend?",
-        "moduleN": current_focus.get("moduleN", 1),
-        "focusReason": current_focus.get("reason", current_focus.get("title", ""))
-    }
+    raise RuntimeError("Groq API could not grade or continue turn across all models.")
 
 
 def generate_feedback(
