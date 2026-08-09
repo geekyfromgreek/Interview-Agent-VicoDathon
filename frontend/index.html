@@ -910,7 +910,12 @@
         function scrollChat() {
             const container = document.getElementById('chat-container');
             if (container) {
-                container.scrollTop = container.scrollHeight;
+                requestAnimationFrame(() => {
+                    container.scrollTop = container.scrollHeight;
+                    setTimeout(() => {
+                        container.scrollTop = container.scrollHeight;
+                    }, 60);
+                });
             }
         }
 
@@ -1438,10 +1443,12 @@
                                         onclick="toggleSpeechRecognition()" title="Click to Speak (Speech-to-Text)">
                                     <span id="mic-icon" class="material-symbols-outlined text-[20px]">mic</span>
                                 </button>
-                                <input id="message-input" class="flex-grow bg-transparent border-none focus:ring-0 font-body-md text-body-md text-on-surface placeholder-on-surface-variant outline-none py-2 monospace-input" 
-                                       placeholder="Type candidate answer or click microphone to speak..." type="text"
+                                <input id="message-input" class="flex-grow bg-transparent border-none focus:ring-0 font-body-md text-body-md text-on-surface placeholder-on-surface-variant outline-none py-2 monospace-input disabled:opacity-50" 
+                                       placeholder="${appState.isTyping ? 'Interviewer is evaluating your response...' : 'Type candidate answer or click microphone to speak...'}" type="text"
+                                       ${appState.isTyping ? 'disabled' : ''}
                                        onkeydown="if(event.key === 'Enter') sendMessage()"/>
-                                <button class="bg-primary-container text-on-primary p-2 rounded hover:bg-primary transition-colors flex items-center justify-center h-10 w-10 active:scale-95 duration-150 shrink-0"
+                                <button class="bg-primary-container text-on-primary p-2 rounded hover:bg-primary transition-colors flex items-center justify-center h-10 w-10 active:scale-95 duration-150 shrink-0 disabled:opacity-50"
+                                        ${appState.isTyping ? 'disabled' : ''}
                                         onclick="sendMessage()">
                                     <span class="material-symbols-outlined text-[20px]">send</span>
                                 </button>

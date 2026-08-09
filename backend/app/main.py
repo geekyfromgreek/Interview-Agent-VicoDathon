@@ -242,7 +242,8 @@ def _handle_turn(req: InterviewRequest) -> InterviewResponse:
     next_moduleN = grading.get("moduleN", 0)
     next_focusReason = grading.get("focusReason", "")
 
-    # Track the new day if we have a valid focus entry
+    # Advance focus topic index for the next turn
+    session.current_focus_index = min(session.current_focus_index + 1, len(session.focus_plan) - 1)
     if session.current_focus_index < len(session.focus_plan):
         new_day = session.focus_plan[session.current_focus_index]["day"]
         session.days_covered.add(new_day)
