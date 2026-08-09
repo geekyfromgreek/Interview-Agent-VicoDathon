@@ -82,6 +82,13 @@ async def interview(req: InterviewRequest) -> InterviewResponse:
 
 # ─── Data Endpoints ──────────────────────────────────────────────────
 
+@app.get("/health")
+@app.get("/api/health")
+async def health_check():
+    """Keep-alive ping endpoint for UptimeRobot / Cron pinger services."""
+    return {"status": "ok", "service": "interviewIQ Engine"}
+
+
 @app.get("/api/candidates")
 async def get_candidates():
     """Retrieve all candidate profiles."""
