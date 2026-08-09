@@ -572,6 +572,15 @@ okahy both live, now how much time to laod backend
 
 One-line summary: User confirming both Vercel and Render deployments are live and asking about Render backend cold start/load times.
 
+---
+
+## Prompt 37: Online Demo Confirmation
+```
+demo is online
+```
+
+One-line summary: User confirming that the live production demo is online and ready.
+
 
 
 
