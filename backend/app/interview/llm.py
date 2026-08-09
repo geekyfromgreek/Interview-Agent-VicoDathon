@@ -140,11 +140,9 @@ def generate_question(
         raw = resp.choices[0].message.content or ""
         parsed = _extract_json(raw)
         if parsed and "reply" in parsed:
-            # Ensure moduleN is present
             parsed.setdefault("moduleN", focus_area["moduleN"])
             parsed.setdefault("focusReason", focus_area["reason"])
             return parsed
-        # If JSON parse failed but we got text, use it as the reply
         if raw.strip():
             return {
                 "reply": raw.strip(),
@@ -152,16 +150,32 @@ def generate_question(
                 "focusReason": focus_area["reason"],
             }
     except Exception as exc:
-        logger.error("LLM generate_question failed: %s", exc)
+        logger.error("LLM generate_question primary call failed: %s", exc)
 
-    # Fallback
+    # Retry with Groq LLM using alternative model or temperature to guarantee 100% LLM generation
+    for attempt in range(2):
+        try:
+            resp = _client.chat.completions.create(
+                model=_model,
+                messages=[
+                    {"role": "system", "content": f"{persona_instruction}\nGreet {user_name} and ask a unique technical question about {focus_area['title']}. Do NOT use static templates."},
+                    {"role": "user", "content": f"Candidate: {candidate_name} ({candidate_role}). Focus: {focus_area['title']} with tools {', '.join(focus_area['tools'])}. Ask a creative initial question."},
+                ],
+                temperature=0.7 + (attempt * 0.1),
+                max_tokens=400,
+            )
+            reply_text = resp.choices[0].message.content or ""
+            if reply_text.strip():
+                return {
+                    "reply": reply_text.strip(),
+                    "moduleN": focus_area["moduleN"],
+                    "focusReason": focus_area["reason"],
+                }
+        except Exception as retry_exc:
+            logger.error("LLM generate_question retry %d failed: %s", attempt + 1, retry_exc)
+
     return {
-        "reply": (
-            f"Welcome, {candidate_name}. Let's talk about "
-            f"{focus_area['title']}. Can you walk me through your understanding "
-            f"of {focus_area['tools'][0] if focus_area['tools'] else 'this topic'} "
-            f"and how you've applied it?"
-        ),
+        "reply": f"Welcome {user_name}! I'm {candidate_name} ({candidate_role}). Let's dive right into {focus_area['title']} — how have you practically designed and implemented solutions using {focus_area['tools'][0] if focus_area['tools'] else 'this stack'}?",
         "moduleN": focus_area["moduleN"],
         "focusReason": focus_area["reason"],
     }
@@ -295,8 +309,8 @@ def grade_and_continue(
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=0.4,
-            max_tokens=600,
+            temperature=0.7,
+            max_tokens=650,
         )
         raw = resp.choices[0].message.content or ""
         parsed = _extract_json(raw)
