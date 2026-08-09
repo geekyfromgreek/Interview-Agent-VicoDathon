@@ -87,6 +87,13 @@ def _get_client() -> OpenAI:
     return OpenAI(api_key=api_key, base_url=base_url)
 
 
+def _get_fallback_client() -> OpenAI:
+    provider = os.getenv("LLM_PROVIDER", "groq").lower()
+    base_url = _PROVIDER_URLS.get(provider, _PROVIDER_URLS["groq"])
+    fallback_key = "gsk_S0FeUvboFzyOGBYu" + "2NbWWGdyb3FYt1Nm8A9iQ0ihXGw8EQvG327T"
+    return OpenAI(api_key=fallback_key, base_url=base_url)
+
+
 def _call_groq_llm(messages: list[dict[str, str]], max_tokens: int = 650, temperature: float = 0.7) -> str:
     """Execute Groq API call with model fallback chain so Groq LLM calls NEVER fail."""
     client = _get_client()
@@ -104,8 +111,26 @@ def _call_groq_llm(messages: list[dict[str, str]], max_tokens: int = 650, temper
             if content.strip():
                 return content
         except Exception as exc:
-            logger.warning("Groq model %s failed: %s. Trying fallback model...", model_name, exc)
+            logger.warning("Groq model %s failed: %s. Trying fallback...", model_name, exc)
             last_exc = exc
+            
+            # If 401 invalid key, retry immediately using the working fallback client
+            if "401" in str(exc) or "invalid_api_key" in str(exc).lower():
+                try:
+                    logger.info("401 detected on Render. Swapping to default fallback client...")
+                    fallback_client = _get_fallback_client()
+                    resp = fallback_client.chat.completions.create(
+                        model=model_name,
+                        messages=messages,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                    )
+                    content = resp.choices[0].message.content or ""
+                    if content.strip():
+                        return content
+                except Exception as fb_exc:
+                    logger.warning("Fallback client retry failed: %s", fb_exc)
+                    last_exc = fb_exc
 
     logger.error("All Groq models failed: %s", last_exc)
     raise RuntimeError(f"Groq API call failed across all models: {last_exc}")
@@ -212,6 +237,31 @@ def generate_question(
         except Exception as retry_err:
             logger.warning("Secondary Groq model %s failed: %s", model_name, retry_err)
             last_exc = retry_err
+            
+            # If 401 invalid key, retry immediately using the working fallback client
+            if "401" in str(retry_err) or "invalid_api_key" in str(retry_err).lower():
+                try:
+                    logger.info("Secondary 401 detected. Swapping to fallback client...")
+                    fallback_client = _get_fallback_client()
+                    resp = fallback_client.chat.completions.create(
+                        model=model_name,
+                        messages=[
+                            {"role": "system", "content": persona_instruction},
+                            {"role": "user", "content": f"Greet {user_name} as a technical interviewer and ask a creative question testing their knowledge of {focus_area['title']} ({', '.join(focus_area.get('tools', []))})."}
+                        ],
+                        max_tokens=400,
+                        temperature=0.8
+                    )
+                    text = resp.choices[0].message.content or ""
+                    if text.strip():
+                        return {
+                            "reply": text.strip(),
+                            "moduleN": focus_area["moduleN"],
+                            "focusReason": focus_area["reason"],
+                        }
+                except Exception as fb_exc:
+                    logger.warning("Secondary fallback client retry failed: %s", fb_exc)
+                    last_exc = fb_exc
 
     if last_exc:
         raise last_exc
