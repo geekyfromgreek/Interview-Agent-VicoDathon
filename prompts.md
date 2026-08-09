@@ -713,6 +713,16 @@ make it one page but fully detailed, add stats if u eant
 
 One-line summary: User requesting to condense the assessment report into a single-page ultra-detailed executive layout containing KPI stat badges, domain score bars, transcript tables, technical strengths, gaps, and curriculum next steps.
 
+---
+
+## Prompt 53: KumbhAarambh Project Alignment & Groq Model Fallback Chain Query
+```
+make the interviwer one like kumbhaarambh chatbot a project in my dekstop folde, it was actually responding in my project it doesnttt
+```
+
+One-line summary: User requesting to align interviewer response generation with their desktop project KumbhAarambh, enforcing automatic multi-model Groq API fallback chain (llama-3.3-70b-versatile, llama3-70b-8192, mixtral-8x7b-32768, gemma2-9b-it) so 100% of interviewer questions and replies are generated live by Groq.
+
+
 
 
 

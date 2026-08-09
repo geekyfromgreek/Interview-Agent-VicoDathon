@@ -70,6 +70,37 @@ def _extract_json(text: str) -> dict | None:
 
     return None
 
+GROQ_MODELS = [
+    os.getenv("LLM_MODEL", "llama-3.3-70b-versatile"),
+    "llama3-70b-8192",
+    "llama3-8b-8192",
+    "mixtral-8x7b-32768",
+    "gemma2-9b-it",
+]
+
+
+def _call_groq_llm(messages: list[dict[str, str]], max_tokens: int = 650, temperature: float = 0.7) -> str:
+    """Execute Groq API call with model fallback chain so Groq LLM calls NEVER fail."""
+    last_exc = None
+    for model_name in GROQ_MODELS:
+        try:
+            logger.info("Calling Groq API model: %s", model_name)
+            resp = _client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            content = resp.choices[0].message.content or ""
+            if content.strip():
+                return content
+        except Exception as exc:
+            logger.warning("Groq model %s failed: %s. Trying fallback model...", model_name, exc)
+            last_exc = exc
+
+    logger.error("All Groq models failed: %s", last_exc)
+    raise RuntimeError(f"Groq API call failed across all models: {last_exc}")
+
 
 # ─── Public API ──────────────────────────────────────────────────────
 
@@ -78,42 +109,6 @@ def generate_question(
     candidate_role: str,
     focus_area: dict[str, Any],
     persona: str = "Pragmatic Architect",
-    user_name: str = "Candidate",
-) -> dict[str, Any]:
-    """Generate the first (or next) interview question for a focus area.
-
-    Returns: {"reply": str, "moduleN": int, "focusReason": str}
-    """
-    day_num = focus_area.get("day", 1)
-    scenario = SCENARIOS.get(day_num, {})
-    typical_question = scenario.get("typical_question", "")
-
-    persona_prompts = {
-        "Pragmatic Architect": (
-            "You are a pragmatic software architect technical interviewer. "
-            "Focus heavily on structural trade-offs, architecture decisions, database choices, and system design."
-        ),
-        "Rigorous Lead": (
-            "You are a tough, rigorous lead developer technical interviewer. "
-            "Keep questions direct and demanding, and grade answers strictly against exact technical terms."
-        ),
-        "Encouraging Mentor": (
-            "You are a friendly, encouraging technical mentor interviewer. "
-            "Frame questions supportively and provide helpful framing context."
-        )
-    }
-    persona_instruction = persona_prompts.get(persona, persona_prompts["Pragmatic Architect"])
-
-    system_prompt = (
-        f"{persona_instruction}\n"
-        f"Greet the candidate as '{user_name}' (e.g. 'Hello {user_name}, let's talk about...').\n"
-        "Ask ONE clear, specific question that tests whether the candidate truly understands "
-        "the topic — not a yes/no question. Personalise the question to their role.\n\n"
-        "You MUST respond with a JSON object and nothing else:\n"
-        '{"reply": "<your question>", "moduleN": <int>, "focusReason": "<short reason>"}'
-    )
-
-    user_prompt = (
         f"Candidate: {candidate_name} ({candidate_role})\n"
         f"Topic: Day {focus_area['day']} — {focus_area['title']}\n"
         f"Module: {focus_area['moduleN']}\n"
@@ -307,16 +302,14 @@ def grade_and_continue(
     )
 
     try:
-        resp = _client.chat.completions.create(
-            model=_model,
+        raw = _call_groq_llm(
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=0.7,
             max_tokens=650,
+            temperature=0.7
         )
-        raw = resp.choices[0].message.content or ""
         parsed = _extract_json(raw)
         if parsed and "verdict" in parsed:
             # Normalise verdict
@@ -450,16 +443,14 @@ def generate_feedback(
     )
 
     try:
-        resp = _client.chat.completions.create(
-            model=_model,
+        raw = _call_groq_llm(
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=0.5,
             max_tokens=800,
+            temperature=0.5
         )
-        raw = resp.choices[0].message.content or ""
         parsed = _extract_json(raw)
         if parsed and "summary" in parsed:
             # Ensure all fields are present
