@@ -323,7 +323,8 @@
             activeEngineeringSection: 'ai_ml',
             selectedPersona: 'Pragmatic Architect',
             showConfigPanel: false,
-            userName: localStorage.getItem('interviewiq_user_name') || ''
+            userName: localStorage.getItem('interviewiq_user_name') || '',
+            ttsEnabled: true
         };
 
         // Initialize App
@@ -523,6 +524,132 @@
             URL.revokeObjectURL(url);
         }
 
+        // --- Speech Recognition (Speech-to-Text) ---
+        let recognition = null;
+        let isListening = false;
+
+        function toggleSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge.");
+                return;
+            }
+
+            const micIcon = document.getElementById('mic-icon');
+            const input = document.getElementById('message-input');
+
+            if (isListening) {
+                if (recognition) recognition.stop();
+                isListening = false;
+                if (micIcon) micIcon.classList.remove('text-status-error', 'animate-pulse');
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = function() {
+                isListening = true;
+                if (micIcon) micIcon.classList.add('text-status-error', 'animate-pulse');
+            };
+
+            recognition.onresult = function(event) {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                if (input) input.value = transcript;
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Speech recognition error:", event.error);
+                isListening = false;
+                if (micIcon) micIcon.classList.remove('text-status-error', 'animate-pulse');
+            };
+
+            recognition.onend = function() {
+                isListening = false;
+                if (micIcon) micIcon.classList.remove('text-status-error', 'animate-pulse');
+            };
+
+            recognition.start();
+        }
+
+        // --- Text-to-Speech (TTS Voice Audio Output) ---
+        function toggleTTS() {
+            appState.ttsEnabled = !appState.ttsEnabled;
+            const ttsIcon = document.getElementById('tts-icon');
+            if (ttsIcon) {
+                ttsIcon.textContent = appState.ttsEnabled ? 'volume_up' : 'volume_off';
+            }
+            if (!appState.ttsEnabled && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function speakInterviewerText(text) {
+            if (!appState.ttsEnabled || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const cleanText = text.replace(/<[^>]*>?/gm, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- Pace Timer (15-Minute Countdown) ---
+        let timerInterval = null;
+        let secondsRemaining = 900;
+
+        function startInterviewTimer() {
+            stopInterviewTimer();
+            secondsRemaining = 900;
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+                if (secondsRemaining > 0) {
+                    secondsRemaining--;
+                    updateTimerDisplay();
+                } else {
+                    stopInterviewTimer();
+                }
+            }, 1000);
+        }
+
+        function stopInterviewTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimerDisplay() {
+            const display = document.getElementById('timer-display');
+            const progressBar = document.getElementById('timer-progress-bar');
+            if (!display) return;
+
+            const mins = Math.floor(secondsRemaining / 60);
+            const secs = secondsRemaining % 60;
+            display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+            const percent = (secondsRemaining / 900) * 100;
+            if (progressBar) {
+                progressBar.style.width = `${percent}%`;
+                if (secondsRemaining < 120) {
+                    progressBar.className = "bg-status-error h-full transition-all duration-1000";
+                    display.className = "font-bold font-label-code text-status-error animate-pulse";
+                } else if (secondsRemaining < 300) {
+                    progressBar.className = "bg-status-warning h-full transition-all duration-1000";
+                    display.className = "font-bold font-label-code text-status-warning";
+                } else {
+                    progressBar.className = "bg-primary h-full transition-all duration-1000";
+                    display.className = "font-bold font-label-code text-primary";
+                }
+            }
+        }
+
         // Save Interview to History
         function saveInterviewSessionToHistory(userName, candidate, persona, feedback, transcript) {
             try {
@@ -619,15 +746,18 @@
                     appState.questionsAsked = 1;
                     appState.activeModule = data.moduleN || 1;
                     if (data.moduleN) {
-                        // Guess day based on first module start
                         appState.daysCoveredSet.add(data.moduleN * 3 - 2); 
                         appState.daysCoveredCount = 1;
                     }
+                    startInterviewTimer();
+                    speakInterviewerText(data.reply);
                 } else {
                     appState.transcript.push({
                         role: 'interviewer',
                         content: "Let's begin the interview. Tell me about your environment setup experiences."
                     });
+                    startInterviewTimer();
+                    speakInterviewerText("Let's begin the interview. Tell me about your environment setup experiences.");
                 }
             } catch (err) {
                 console.error("START interview failed:", err);
@@ -635,6 +765,8 @@
                     role: 'interviewer',
                     content: "Welcome. Let's start the session. Can you describe how you configure Python environments?"
                 });
+                startInterviewTimer();
+                speakInterviewerText("Welcome. Let's start the session. Can you describe how you configure Python environments?");
             } finally {
                 appState.isTyping = false;
                 render();
@@ -678,6 +810,7 @@
 
                     if (data.done) {
                         // End of interview
+                        stopInterviewTimer();
                         appState.feedback = data.feedback;
                         saveInterviewSessionToHistory(appState.userName, appState.selectedCandidate, appState.selectedPersona, data.feedback, appState.transcript);
                         navigateTo('feedback_report');
@@ -695,6 +828,7 @@
                             appState.daysCoveredSet.add(data.moduleN * 3 - 1); // Mock mapping for visual representation
                             appState.daysCoveredCount = Math.min(4, appState.daysCoveredSet.size);
                         }
+                        speakInterviewerText(data.reply);
                     }
                 }
             } catch (err) {
@@ -997,7 +1131,7 @@
                         <span class="material-symbols-outlined text-primary text-5xl mb-4">analytics</span>
                         <h3 class="font-headline-md text-headline-md text-on-surface mb-2">No session history yet</h3>
                         <p class="text-on-surface-variant font-body-md max-w-sm mx-auto mb-6">Complete a practice assessment to start tracking your progress over time and see where you stand.</p>
-                        <button class="bg-primary-container text-on-primary font-bold px-6 py-2.5 rounded-lg hover:bg-primary transition-colors active:scale-95 duration-150" onclick="navigateTo('candidate_select')">Select Candidate</button>
+                        <button class="bg-primary-container text-on-primary font-bold px-6 py-2.5 rounded-lg hover:bg-primary transition-colors active:scale-95 duration-150" onclick="navigateTo('candidate_select')">Select Interviewer</button>
                     </div>
                 `;
             } else {
@@ -1022,6 +1156,13 @@
                                 <span class="bg-status-error bg-opacity-10 text-status-error font-bold text-xs px-2.5 py-0.5 rounded-full border border-status-error border-opacity-20">${h.score.gap} Gap</span>
                             </div>
                         </div>
+                    `;
+                });
+            }
+            
+            return `
+                <main class="max-w-4xl mx-auto px-margin-mobile md:px-stack-lg py-stack-lg min-h-[75vh]">
+                    <div class="mb-8">
                         <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-xs font-bold text-primary font-label-caps mb-3">
                             <span class="material-symbols-outlined text-[14px]">info</span>
                             HISTORICAL ASSESSMENT TRACKER
@@ -1227,7 +1368,19 @@
                     <!-- Left Sidebar Panel -->
                     <section class="w-full md:w-64 flex flex-col gap-4 py-2 border-b md:border-b-0 md:border-r border-border-subtle pr-0 md:pr-6 shrink-0 mt-4">
                         <div class="bg-surface-gray border border-border-subtle rounded-xl p-4 flex flex-col gap-3">
-                            <h2 class="font-headline-md text-headline-md border-b border-border-subtle pb-2">Session Stats</h2>
+                            <div class="flex justify-between items-center border-b border-border-subtle pb-2">
+                                <h2 class="font-headline-md text-headline-md">Session Stats</h2>
+                                <button class="p-1 rounded hover:bg-surface-container flex items-center justify-center text-primary" onclick="toggleTTS()" title="Toggle Voice Audio Output">
+                                    <span id="tts-icon" class="material-symbols-outlined text-[18px]">${appState.ttsEnabled ? 'volume_up' : 'volume_off'}</span>
+                                </button>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-primary">timer</span> Pace Timer:</span>
+                                <span id="timer-display" class="font-bold font-label-code text-primary">15:00</span>
+                            </div>
+                            <div class="w-full bg-surface-container-high rounded-full h-1.5 overflow-hidden">
+                                <div id="timer-progress-bar" class="bg-primary h-full transition-all duration-1000" style="width: 100%;"></div>
+                            </div>
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-on-surface-variant">Questions:</span>
                                 <span class="font-bold text-primary">${appState.questionsAsked} / 8+</span>
@@ -1264,10 +1417,14 @@
                         <!-- Pinned Message Input panel -->
                         <div class="w-full bg-surface border border-border-subtle p-stack-sm rounded-xl shadow-md my-4 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
                             <div class="flex items-center gap-stack-sm bg-transparent p-1">
+                                <button id="mic-btn" class="p-2 rounded hover:bg-surface-container-high text-on-surface-variant transition-all flex items-center justify-center h-10 w-10 shrink-0" 
+                                        onclick="toggleSpeechRecognition()" title="Click to Speak (Speech-to-Text)">
+                                    <span id="mic-icon" class="material-symbols-outlined text-[20px]">mic</span>
+                                </button>
                                 <input id="message-input" class="flex-grow bg-transparent border-none focus:ring-0 font-body-md text-body-md text-on-surface placeholder-on-surface-variant outline-none py-2 monospace-input" 
-                                       placeholder="Type candidate answer and hit Enter..." type="text"
+                                       placeholder="Type candidate answer or click microphone to speak..." type="text"
                                        onkeydown="if(event.key === 'Enter') sendMessage()"/>
-                                <button class="bg-primary-container text-on-primary p-2 rounded hover:bg-primary transition-colors flex items-center justify-center h-10 w-10 active:scale-95 duration-150"
+                                <button class="bg-primary-container text-on-primary p-2 rounded hover:bg-primary transition-colors flex items-center justify-center h-10 w-10 active:scale-95 duration-150 shrink-0"
                                         onclick="sendMessage()">
                                     <span class="material-symbols-outlined text-[20px]">send</span>
                                 </button>
