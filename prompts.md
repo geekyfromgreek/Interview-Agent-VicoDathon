@@ -607,3 +607,46 @@ botj arr diff
 ```
 
 One-line summary: User sharing screenshots showing Vercel frontend URL ('interview-agent-vicodathon.vercel.app') and Render backend URL ('interviewiq-api.onrender.com').
+
+---
+
+## Prompt 41: Mobile 3D Model Responsive Scaling Query
+```
+on phone we need to handle the model, look inside nd fitness hoe we handled it and make it  sasme, do not push before u ask me
+```
+
+One-line summary: User requesting mobile 3D model positioning and scaling matching the ND Fitness responsive media query rules.
+
+---
+
+## Prompt 42: Differentiated Competency Scores & Enhanced Report Export Query
+```
+add   sample data  for where i excel diffrently, not everything can be 100, give a detailed report sample to download, it should have tables graphs anayliss improvemnts all of oit, remote set backend url from 3 line menu
+```
+
+One-line summary: User requesting differentiated competency baseline metrics, a comprehensive Markdown evaluation report with tables, score visualizers, and transcript analysis, and removing 'Set Backend URL' from the hamburger menu.
+
+---
+
+## Prompt 43: LLM Direct Evaluation Reaction & Wrong Answer Report Logging Query
+```
+we need to stilll fix interviewer answer, whatever he asnwers groq api should respond to it, if he answers wrong report will say it  wwas wrong, make it happen
+```
+
+One-line summary: User instructing to ensure Groq LLM API directly reacts/corrects every candidate turn answer and explicitly logs incorrect answers under report gaps.
+
+---
+
+## Prompt 44: Demo Metrics Text Banner & Hint-Based Interviewer Probing Query
+```
+mentiom report nad  progress is   a demo, a short text, grok annot correct answer, it will just as kagain or maybe give a hint if anser si wrong 2 times, so each answer interviwer gives must be diffrent, now  fianlly  give me commit message after all this
+```
+
+One-line summary: User requesting subtle demo text badges on progress & report pages, hint-based probing logic for wrong answers (nudge on 2nd attempt), guaranteed unique interviewer turns, and a final git commit message.
+
+---
+
+
+
+
+

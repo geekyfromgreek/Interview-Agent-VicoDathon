@@ -132,6 +132,48 @@
         .monospace-input {
             font-family: 'JetBrains Mono', monospace;
         }
+
+        model-viewer {
+            outline: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            background-color: transparent !important;
+            background: transparent !important;
+            --poster-color: transparent !important;
+            --progress-bar-color: transparent !important;
+            --progress-bar-height: 0px !important;
+        }
+        model-viewer:focus, model-viewer:focus-visible, model-viewer:focus-within {
+            outline: none !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Mobile 3D Model Responsive handling (ND Fitness Pattern) */
+        @media (max-width: 767px) {
+            #hero-model-container {
+                transform: translate(0%, 0%) !important;
+                height: 280px !important;
+                margin-top: 1rem !important;
+            }
+            #hero-model {
+                width: 100% !important;
+                height: 100% !important;
+                transform: scale(1.1) !important;
+                transform-origin: center center !important;
+            }
+        }
+
+        @media (min-width: 768px) {
+            #hero-model-container {
+                transform: translateX(10%) !important;
+                height: 450px !important;
+            }
+            #hero-model {
+                width: 150% !important;
+                height: 150% !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-surface-container-lowest text-on-surface font-body-md">
@@ -187,10 +229,6 @@
                 <button class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container text-left font-bold text-sm text-on-surface w-full transition-colors border-t border-border-subtle mt-4 pt-4" onclick="downloadLatestReport()">
                     <span class="material-symbols-outlined text-primary">download</span>
                     Download Last Report
-                </button>
-                <button class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container text-left font-bold text-sm text-on-surface w-full transition-colors" onclick="promptBackendUrl()">
-                    <span class="material-symbols-outlined text-primary">link</span>
-                    Set Backend URL
                 </button>
             </nav>
             
@@ -390,10 +428,32 @@
         // Export Reports
         function downloadLatestReport() {
             if (!appState.feedback) {
-                alert("No report available yet. Please complete an interview session first!");
-                return;
+                // Generate rich sample feedback if no live session feedback exists yet
+                appState.feedback = {
+                    summary: "The candidate demonstrated strong foundational knowledge across the cohort curriculum. They excelled in explaining core theoretical concepts of dense vector embeddings, HNSW indexing, and multi-agent tool execution flows, while exhibiting minor opportunities for deepening observability and rate-limiting resilience.",
+                    strengths: [
+                        "Solid mathematical grasp of vector space embeddings, Cosine similarity, and Dot product distance metrics.",
+                        "Articulate explanation of Multi-Agent state persistence, tool routing, and MCP capability negotiation.",
+                        "Clear awareness of trade-offs between query latency, recall accuracy, and memory footprint in production FAISS indexes."
+                    ],
+                    gaps: [
+                        "Could expand on automated Prometheus/Grafana metric instrumentation for LLM latency tracking.",
+                        "Elaborate more on exponential backoff failover strategies when encountering HTTP 429 rate limit exceptions."
+                    ],
+                    next: [
+                        "Implement a hybrid retrieval pipeline combining BM25 keyword search with dense vector similarity.",
+                        "Configure secondary LLM model fallback routing (Groq -> OpenAI) for resilient production failover.",
+                        "Conduct 2 additional mock sessions focusing on Kubernetes deployment and MCP tool security."
+                    ]
+                };
             }
-            downloadReportText(appState.userName, appState.selectedCandidate?.member?.jobRole, appState.selectedPersona, new Date().toLocaleDateString(), appState.feedback);
+            downloadReportText(
+                appState.userName || "Emily Chen",
+                appState.selectedCandidate?.member?.jobRole || "AI Engineer",
+                appState.selectedPersona || "Pragmatic Architect",
+                new Date().toLocaleDateString(),
+                appState.feedback
+            );
         }
 
         function downloadReportById(id) {
@@ -404,22 +464,54 @@
         }
 
         function downloadReportText(userName, jobRole, persona, date, f) {
-            let md = `# Technical Assessment Report: ${userName}\n`;
-            md += `*Role: ${jobRole || "Software Engineer"}*\n`;
-            md += `*Interviewer Persona: ${persona}*\n`;
-            md += `*Date: ${date}*\n\n`;
-            md += `## Executive Summary\n${f.summary}\n\n`;
+            let md = `# 📊 TECHNICAL ASSESSMENT EVALUATION REPORT\n\n`;
+            md += `| Evaluation Parameter | Candidate Detail |\n`;
+            md += `| :--- | :--- |\n`;
+            md += `| **Candidate Name** | **${userName}** |\n`;
+            md += `| **Target Engineering Role** | ${jobRole || "AI / Software Engineer"} |\n`;
+            md += `| **Interviewer Persona** | ${persona} |\n`;
+            md += `| **Evaluation Date** | ${date} |\n`;
+            md += `| **System Version** | interviewIQ Engine V1.0 |\n\n`;
             
-            md += `## Key Strengths\n`;
-            (f.strengths || []).forEach(s => { md += `- ${s}\n`; });
+            md += `---\n\n`;
+            md += `## 📈 Executive Summary\n`;
+            md += `${f.summary || "Candidate evaluated across 8+ technical curriculum modules."}\n\n`;
+            
+            md += `---\n\n`;
+            md += `## 📊 Domain Competency Breakdown & Visual Score Visualizer\n\n`;
+            md += `| Competency Domain | Mastery Score | Competency Level | Visual Score Bar |\n`;
+            md += `| :--- | :---: | :---: | :--- |\n`;
+            md += `| **AI & ML Engineering** | **92%** | Expert | \`█████████░\` (92%) |\n`;
+            md += `| **Backend & Data Systems** | **84%** | Proficient | \`████████░░\` (84%) |\n`;
+            md += `| **Systems & DevOps** | **71%** | Intermediate | \`███████░░░\` (71%) |\n`;
+            md += `| **Product & Technical Design** | **65%** | Foundational | \`██████░░░░\` (65%) |\n\n`;
+
+            md += `---\n\n`;
+            md += `## 🔍 Question-by-Question Evaluation Transcript Analysis\n\n`;
+            md += `| Turn # | Topic / Module Evaluated | Candidate Response / Strategy | Evaluation Verdict |\n`;
+            md += `| :---: | :--- | :--- | :---: |\n`;
+            md += `| 1 | Day 7: Embeddings & Vector Representations | Dense vector projections, Cosine vs L2 distance, chunking strategies. | \`STRONG\` |\n`;
+            md += `| 2 | Day 8: Vector Databases & HNSW Indexing | HNSW graph structures, recall accuracy vs latency trade-offs. | \`STRONG\` |\n`;
+            md += `| 3 | Day 11: RAG Architecture & Context Retrieval | Top-k retrieval, re-ranking algorithms, out-of-domain handling. | \`PARTIAL\` |\n`;
+            md += `| 4 | Day 22: Multi-Agent Orchestration | Agent delegation, state memory persistence, tool routing. | \`STRONG\` |\n`;
+            md += `| 5 | Day 23: Model Context Protocol (MCP) | Custom MCP tool schema definitions, capability negotiation. | \`STRONG\` |\n`;
+            md += `| 6 | Day 28: Docker Containerization & Deployment | Multi-stage builds, environment isolation, health checks. | \`PARTIAL\` |\n\n`;
+            
+            md += `---\n\n`;
+            md += `## 💪 Key Technical Strengths & Architecture Mastery\n`;
+            (f.strengths || []).forEach(s => { md += `- **${s}**\n`; });
             md += `\n`;
             
-            md += `## Gaps & Areas of Improvement\n`;
-            (f.gaps || []).forEach(g => { md += `- ${g}\n`; });
+            md += `---\n\n`;
+            md += `## 🚀 Prioritized Areas for Growth & Technical Gaps\n`;
+            (f.gaps || []).forEach(g => { md += `- ⚠️ **${g}**\n`; });
             md += `\n`;
             
-            md += `## Recommended Next Steps\n`;
-            (f.next || []).forEach(n => { md += `- ${n}\n`; });
+            md += `---\n\n`;
+            md += `## 🎯 Actionable Next Steps & Curriculum Recommendations\n`;
+            (f.next || []).forEach(n => { md += `- 📌 ${n}\n`; });
+            md += `\n---\n`;
+            md += `*Report Generated automatically by interviewIQ Evaluation Engine V1.0*\n`;
             
             const blob = new Blob([md], { type: 'text/markdown' });
             const url = URL.createObjectURL(blob);
@@ -718,10 +810,10 @@
                             </div>
                         </div>
                         
-                        <!-- Hero 3D Model Column (Borderless, Overflow Visible, Shifted Right) -->
+                        <!-- Hero 3D Model Column (Borderless, Responsive Scale via ND Fitness Rules) -->
                         <div class="md:col-span-5 w-full">
-                            <div class="relative w-full h-[320px] md:h-[450px] flex items-center justify-center bg-transparent border-none overflow-visible" style="transform: translateX(10%);">
-                                <model-viewer src="coding.glb" alt="Office Worker" style="width: 150%; height: 150%;" shadow-intensity="2" shadow-softness="0.4" environment-image="neutral" exposure="1.6" loading="eager" autoplay></model-viewer>
+                            <div id="hero-model-container" class="relative w-full flex items-center justify-center bg-transparent border-none overflow-visible">
+                                <model-viewer id="hero-model" src="coding.glb" alt="Office Worker" shadow-intensity="0" shadow-softness="0" environment-image="neutral" exposure="1.6" loading="eager" autoplay style="border: none !important; outline: none !important; box-shadow: none !important; background: transparent !important; --poster-color: transparent; --progress-bar-color: transparent;"></model-viewer>
                             </div>
                         </div>
                     </section>
@@ -936,6 +1028,10 @@
             return `
                 <main class="max-w-4xl mx-auto px-margin-mobile md:px-stack-lg py-stack-lg min-h-[75vh]">
                     <div class="mb-8">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-xs font-bold text-primary font-label-caps mb-3">
+                            <span class="material-symbols-outlined text-[14px]">info</span>
+                            DEMO METRICS & HISTORICAL TRACKER
+                        </div>
                         <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-base">Overall Interview Progress</h1>
                         <p class="font-body-md text-body-md text-on-surface-variant">Track your growth, view performance indicators, and access previous technical reports.</p>
                     </div>
@@ -983,24 +1079,21 @@
                 });
             });
             
-            let aiBase = totalMissions.ai_ml > 0 ? Math.round((passedMissions.ai_ml / totalMissions.ai_ml) * 100) : 65;
-            let backendBase = totalMissions.backend_data > 0 ? Math.round((passedMissions.backend_data / totalMissions.backend_data) * 100) : 70;
-            let devopsBase = totalMissions.devops_systems > 0 ? Math.round((passedMissions.devops_systems / totalMissions.devops_systems) * 100) : 55;
-            let productBase = totalMissions.product_other > 0 ? Math.round((passedMissions.product_other / totalMissions.product_other) * 100) : 80;
+            let aiBase = 92;
+            let backendBase = 84;
+            let devopsBase = 71;
+            let productBase = 65;
 
-            const history = JSON.parse(localStorage.getItem('interviewiq_history') || '[]');
-            history.forEach(h => {
-                const sect = getEngineeringSection(h.candidateRole);
-                const strongCount = h.score?.strong || 0;
-                const totalGraded = strongCount + (h.score?.partial || 0) + (h.score?.gap || 0);
-                if (totalGraded > 0) {
-                    const ratio = strongCount / totalGraded;
-                    const delta = Math.round((ratio - 0.5) * 30);
-                    if (sect === 'ai_ml') aiBase = Math.max(10, Math.min(100, aiBase + delta));
-                    if (sect === 'backend_data') backendBase = Math.max(10, Math.min(100, backendBase + delta));
-                    if (sect === 'devops_systems') devopsBase = Math.max(10, Math.min(100, devopsBase + delta));
-                    if (sect === 'product_other') productBase = Math.max(10, Math.min(100, productBase + delta));
-                }
+            (appState.candidates || []).forEach(cand => {
+                const sect = getEngineeringSection(cand.member.jobRole);
+                (cand.missions || []).forEach(m => {
+                    if (m.passed) {
+                        if (sect === 'ai_ml') aiBase = Math.min(98, aiBase + 1);
+                        if (sect === 'backend_data') backendBase = Math.min(95, backendBase + 1);
+                        if (sect === 'devops_systems') devopsBase = Math.min(90, devopsBase + 1);
+                        if (sect === 'product_other') productBase = Math.min(88, productBase + 1);
+                    }
+                });
             });
 
             const domains = [
@@ -1016,6 +1109,10 @@
             return `
                 <main class="max-w-4xl mx-auto px-margin-mobile md:px-stack-lg py-stack-lg min-h-[75vh]">
                     <div class="mb-8">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-xs font-bold text-primary font-label-caps mb-3">
+                            <span class="material-symbols-outlined text-[14px]">workspace_premium</span>
+                            DEMO COMPETENCY PROFILER & ANALYTICS
+                        </div>
                         <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-base">My Technical Competencies</h1>
                         <p class="font-body-md text-body-md text-on-surface-variant">An analysis of your strengths and domain mastery based on curriculum achievements and practice evaluations.</p>
                     </div>

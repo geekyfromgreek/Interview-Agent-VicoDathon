@@ -247,20 +247,25 @@ def grade_and_continue(
 
     system_prompt = (
         f"{persona_instruction}\n"
-        f"You are grading a technical interview answer for '{user_name}' and optionally generating "
-        "the next question. Be fair — award 'strong' for solid understanding, "
-        "'partial' for surface-level answers, 'gap' for wrong or missing knowledge.\n\n"
-        "SPECIAL RULE FOR CANDIDATE QUESTIONS/GREETINGS/STALLS/UNKNOWN:\n"
-        "1. If the candidate asks a generic question or greets (e.g. 'what is ai?', 'hello'): answer/greet briefly, then prompt back to the technical topic.\n"
-        "2. If the candidate indicates they don't know, have no idea, or pass (e.g. 'no ide', 'no idea', 'idk', 'not sure', 'pass', 'skip'): acknowledge supportively without generic boilerplate, briefly explain or pivot to the next topic, and set verdict to 'gap'.\n"
-        "3. NEVER output static repetitive filler like 'Let's continue — could you expand on that?'. Every question MUST be unique and reference specific topic details.\n\n"
+        f"You are grading a technical interview answer for '{user_name}' and generating the next response.\n"
+        "Be fair and analytical — award 'strong' for accurate/solid understanding, "
+        "'partial' for surface-level answers, and 'gap' for wrong, incorrect, or missing knowledge.\n\n"
+        "INTERACTION RULE:\n"
+        "1. In 'nextQuestion', start with a 1-2 sentence direct reaction to what the candidate just said.\n"
+        "   - DO NOT dump the full correct answer immediately if they are wrong.\n"
+        "   - If their answer is wrong for the 1st time: do NOT give the answer away. Ask them to re-think their assumption (e.g. 'Not quite—think about how memory complexity grows here. How would you adjust that?').\n"
+        "   - If their answer is wrong for the 2nd time on the same topic: offer a subtle hint/nudge, brief 1-sentence insight, and pivot to the next focus area.\n"
+        "   - If their answer is strong: validate their specific technical insight enthusiastically.\n"
+        "   - If they said 'idk', 'no idea', or pass: acknowledge supportively, give a 1-sentence nudge, and pivot.\n"
+        "2. EVERY response MUST be 100% unique, dynamic, and tailored to their exact words—NEVER use repetitive static filler.\n"
+        "3. THEN ask your next follow-up question or pivot to the next focus topic.\n\n"
         "You MUST respond with a JSON object and nothing else:\n"
         "{\n"
         '  "verdict": "strong" | "partial" | "gap",\n'
         '  "shouldEnd": true | false,\n'
-        '  "nextQuestion": "<your unique response greeting/answering them directly or pivoting, then asking a specific technical question>",\n'
-        '  "moduleN": <int, of the active topic>,\n'
-        '  "focusReason": "<reason of the active topic>"\n'
+        '  "nextQuestion": "<1-2 sentence direct reaction/hint + unique follow-up question>",\n'
+        '  "moduleN": <int, active topic module>,\n'
+        '  "focusReason": "<active topic title>"\n'
         "}\n\n"
         "If shouldEnd is true, omit nextQuestion/moduleN/focusReason."
     )
@@ -402,13 +407,17 @@ def generate_feedback(
     )
 
     system_prompt = (
-        f"You are writing a final technical assessment feedback report for '{user_name}' who practiced a simulated technical interview.\n"
-        "Every bullet point MUST reference something specific they actually said — no generic filler.\n\n"
+        f"You are writing a comprehensive technical assessment feedback report for '{user_name}'.\n"
+        "CRITICAL RULES:\n"
+        "1. If the candidate answered any questions wrong or received a 'gap' / 'partial' verdict, you MUST explicitly identify those wrong answers and missing technical concepts under 'gaps'.\n"
+        "2. Detail exactly why those answers were incorrect based on the transcript.\n"
+        "3. Under 'strengths', highlight specific technical topics they answered correctly.\n"
+        "4. Under 'next', list concrete actionable study recommendations.\n\n"
         "You MUST respond with a JSON object and nothing else:\n"
         "{\n"
-        '  "summary": "<2-3 sentence overall assessment>",\n'
-        '  "strengths": ["<specific strength 1>", "..."],\n'
-        '  "gaps": ["<specific gap 1>", "..."],\n'
+        '  "summary": "<2-3 sentence overall performance evaluation>",\n'
+        '  "strengths": ["<specific accurate answer / strength 1>", "..."],\n'
+        '  "gaps": ["<specific wrong answer / gap 1 with explanation>", "..."],\n'
         '  "next": ["<specific recommendation 1>", "..."]\n'
         "}"
     )
