@@ -7,6 +7,7 @@
     
     <!-- Scripts & Tailwind CSS Config -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     <link rel="preload" href="coding.glb" as="fetch" crossorigin="anonymous"/>
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
@@ -1021,16 +1022,9 @@
                                 <span class="bg-status-error bg-opacity-10 text-status-error font-bold text-xs px-2.5 py-0.5 rounded-full border border-status-error border-opacity-20">${h.score.gap} Gap</span>
                             </div>
                         </div>
-                    `;
-                });
-            }
-            
-            return `
-                <main class="max-w-4xl mx-auto px-margin-mobile md:px-stack-lg py-stack-lg min-h-[75vh]">
-                    <div class="mb-8">
                         <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-xs font-bold text-primary font-label-caps mb-3">
                             <span class="material-symbols-outlined text-[14px]">info</span>
-                            DEMO METRICS & HISTORICAL TRACKER
+                            HISTORICAL ASSESSMENT TRACKER
                         </div>
                         <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-base">Overall Interview Progress</h1>
                         <p class="font-body-md text-body-md text-on-surface-variant">Track your growth, view performance indicators, and access previous technical reports.</p>
@@ -1111,7 +1105,7 @@
                     <div class="mb-8">
                         <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-xs font-bold text-primary font-label-caps mb-3">
                             <span class="material-symbols-outlined text-[14px]">workspace_premium</span>
-                            DEMO COMPETENCY PROFILER & ANALYTICS
+                            COMPETENCY PROFILER & MASTERY ANALYTICS
                         </div>
                         <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-base">My Technical Competencies</h1>
                         <p class="font-body-md text-body-md text-on-surface-variant">An analysis of your strengths and domain mastery based on curriculum achievements and practice evaluations.</p>
@@ -1404,16 +1398,147 @@
                         </div>
                     </section>
                     
-                    <!-- Back CTA -->
-                    <div class="mt-4">
-                        <button class="w-full bg-primary-container text-on-primary font-headline-md text-headline-md py-3 px-4 rounded-xl hover:bg-surface-tint transition-colors active:scale-95 duration-150 flex items-center justify-center gap-2 font-bold"
+                    <!-- Back CTA & PDF Exporter -->
+                    <div class="mt-4 flex flex-col sm:flex-row gap-4">
+                        <button class="flex-grow bg-primary-container text-on-primary font-headline-md text-headline-md py-3.5 px-6 rounded-xl hover:bg-surface-tint transition-colors active:scale-95 duration-150 flex items-center justify-center gap-2 font-bold shadow-sm"
                                 onclick="navigateTo('candidate_select')">
-                            Try Another Candidate
+                            Try Another Interviewer
                             <span class="material-symbols-outlined">arrow_forward</span>
+                        </button>
+                        <button class="bg-primary text-on-primary font-headline-md text-headline-md py-3.5 px-6 rounded-xl hover:bg-opacity-90 transition-colors active:scale-95 duration-150 flex items-center justify-center gap-2 font-bold shadow-md"
+                                onclick="downloadLatestReportPDF()">
+                            <span class="material-symbols-outlined">picture_as_pdf</span>
+                            Download Report (PDF)
                         </button>
                     </div>
                 </main>
             `;
+        }
+
+        // Generate and Download PDF Assessment Report with Graphs
+        function downloadLatestReportPDF() {
+            if (!appState.feedback) {
+                downloadLatestReport(); // Trigger baseline report setup
+            }
+
+            const element = document.createElement('div');
+            element.style.padding = '32px';
+            element.style.fontFamily = "'Hanken Grotesk', system-ui, -apple-system, sans-serif";
+            element.style.color = '#1e293b';
+            element.style.backgroundColor = '#ffffff';
+
+            const f = appState.feedback;
+            const userName = appState.userName || "Emily Chen";
+            const role = appState.selectedCandidate?.member?.jobRole || "AI Engineer";
+            const persona = appState.selectedPersona || "Pragmatic Architect";
+            const date = new Date().toLocaleDateString();
+
+            element.innerHTML = `
+                <div style="border-bottom: 3px solid #004ac6; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1 style="font-size: 24px; margin: 0; color: #004ac6; font-weight: 800; tracking-tight: -0.02em;">interviewIQ — Technical Evaluation Report</h1>
+                        <p style="margin: 6px 0 0 0; color: #64748b; font-size: 13px;">Candidate: <strong style="color: #0f172a;">${userName}</strong> (${role}) &bull; Evaluator: <strong style="color: #0f172a;">${persona}</strong></p>
+                    </div>
+                    <span style="font-size: 12px; font-weight: 700; color: #64748b; background: #f1f5f9; padding: 4px 10px; border-radius: 6px;">${date}</span>
+                </div>
+
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin-bottom: 24px;">
+                    <h2 style="font-size: 15px; margin-top: 0; margin-bottom: 8px; color: #0f172a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Executive Performance Summary</h2>
+                    <p style="margin: 0; font-size: 13.5px; line-height: 1.6; color: #334155;">${f.summary}</p>
+                </div>
+
+                <h2 style="font-size: 15px; color: #0f172a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">Domain Competency Evaluation & Score Graphs</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px;">
+                    <thead>
+                        <tr style="background-color: #f1f5f9; text-align: left; color: #475569; font-weight: 700;">
+                            <th style="padding: 10px 12px; border: 1px solid #e2e8f0;">Competency Domain</th>
+                            <th style="padding: 10px 12px; border: 1px solid #e2e8f0; width: 80px; text-align: center;">Score</th>
+                            <th style="padding: 10px 12px; border: 1px solid #e2e8f0;">Visual Score Graph Bar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 600;">AI & Machine Learning Engineering</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">92%</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0;">
+                                <div style="background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, #004ac6, #2563eb); width: 92%; height: 100%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 600;">Backend & Scalable Data Systems</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">84%</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0;">
+                                <div style="background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, #004ac6, #2563eb); width: 84%; height: 100%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 600;">Systems, Protocols & DevOps</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">71%</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0;">
+                                <div style="background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, #004ac6, #2563eb); width: 71%; height: 100%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 600;">Product & Architecture Design</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0; font-weight: 800; color: #004ac6; text-align: center;">65%</td>
+                            <td style="padding: 10px 12px; border: 1px solid #e2e8f0;">
+                                <div style="background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden;">
+                                    <div style="background: linear-gradient(90deg, #004ac6, #2563eb); width: 65%; height: 100%;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+                    <div style="flex: 1; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px;">
+                        <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 13.5px; color: #166534; font-weight: 700; text-transform: uppercase;">Core Technical Strengths</h3>
+                        <ul style="margin: 0; padding-left: 18px; font-size: 12.5px; color: #15803d; line-height: 1.5;">
+                            ${(f.strengths || []).map(s => `<li style="margin-bottom: 4px;">${s}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div style="flex: 1; background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 16px;">
+                        <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 13.5px; color: #991b1b; font-weight: 700; text-transform: uppercase;">Identified Technical Gaps</h3>
+                        <ul style="margin: 0; padding-left: 18px; font-size: 12.5px; color: #b91c1c; line-height: 1.5;">
+                            ${(f.gaps || []).map(g => `<li style="margin-bottom: 4px;">${g}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 24px;">
+                    <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 13.5px; color: #0f172a; font-weight: 700; text-transform: uppercase;">Actionable Curriculum Next Steps</h3>
+                    <ul style="margin: 0; padding-left: 18px; font-size: 12.5px; color: #475569; line-height: 1.5;">
+                        ${(f.next || []).map(n => `<li style="margin-bottom: 4px;">${n}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div style="border-top: 1px solid #e2e8f0; pt-12px; text-align: center; color: #94a3b8; font-size: 11px; font-weight: 500;">
+                    Report automatically computed by interviewIQ LLM Assessment Engine V1.0
+                </div>
+            `;
+
+            const opt = {
+                margin:       [0.4, 0.4, 0.4, 0.4],
+                filename:     `interview_report_${userName.toLowerCase().replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            if (window.html2pdf) {
+                html2pdf().set(opt).from(element).save();
+            } else {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`<html><head><title>Technical Assessment Report</title></head><body style="padding:20px;">${element.innerHTML}</body></html>`);
+                printWindow.document.close();
+                printWindow.print();
+            }
         }
     </script>
 </body>

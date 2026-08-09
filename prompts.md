@@ -646,12 +646,28 @@ One-line summary: User requesting subtle demo text badges on progress & report p
 
 ---
 
-## Prompt 45: 3D Model Shadow & Boundary Bar Removal Query
+
+
+
+
+
+
+mpt 45: 3D Model Shadow & Boundary Bar Removal Query
 ```
 the black bar of moel must not appear, feels like its boundary of 3d model ,remove it
 ```
 
 One-line summary: User requesting complete removal of black contact shadow plane and boundary borders around the 3D model.
+
+---
+
+## Prompt 47: Predefined Answer LLM Check, PDF Report Exporter & Terminology Update Query
+```
+for each question of each inervier, keep a pre defined answer, llm checks if user asnwer is close to it, or based on user answer , it generates a response, als o after test ends, it should be try another interviwer not candidate, remove demo word from everywhere, the report should be downloadable pdf wit graphs chart  evalatuon all done by llm, after inerview ends user must habe option to doenload report just near try anothr candidate, everthinfg must be unique for each candiate as its llm based
+```
+
+One-line summary: User instructing LLM to evaluate candidate answers against predefined expected answers, updating button text to 'Try Another Interviewer', removing all 'demo' wording, adding downloadable PDF report with charts next to the CTA, and ensuring 100% LLM uniqueness.
+
 
 
 
