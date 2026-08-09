@@ -22,6 +22,7 @@ from app.models import InterviewRequest, InterviewResponse, Feedback
 from app.interview.focus_plan import build_focus_plan, CANDIDATES, CURRICULUM
 from app.interview.session_store import create_session, get_session
 from app.interview import llm
+from app.interview import db_store
 
 # ─── Logging ─────────────────────────────────────────────────────────
 
@@ -345,7 +346,10 @@ def _should_end_interview(
     return False
 
 
-# ─── Static Mount ────────────────────────────────────────────────────
+# ─── Static Mount (conditional — only if frontend dir exists locally) ────
 
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend"))
-app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
+if os.path.isdir(frontend_dir):
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
+else:
+    logger.warning("Frontend dir not found at %s — static mount skipped (normal on Render)", frontend_dir)
