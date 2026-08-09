@@ -388,18 +388,16 @@
             render();
         }
 
-        function getEngineeringSection(role, cand) {
+        function getEngineeringSection(role) {
             const r = (role || '').toLowerCase();
-            const missionsStr = cand && cand.missions ? cand.missions.map(m => (m.title || '').toLowerCase()).join(' ') : '';
-            
-            if (missionsStr.includes('mcp') || missionsStr.includes('agent') || missionsStr.includes('langchain') || r.includes('architect') || r.includes('principal')) {
+            if (r.includes('data') || r.includes('ai engineer') || r.includes('artificial intelligence') || r.includes('analyst') || r.includes('machine learning')) {
+                return 'ai_rag';
+            }
+            if (r.includes('architect') || r.includes('principal') || r.includes('distinguished') || r.includes('hr') || r.includes('intern')) {
                 return 'agentic_mcp';
             }
-            if (missionsStr.includes('docker') || missionsStr.includes('kubernetes') || missionsStr.includes('monitoring') || r.includes('devops') || r.includes('legacy') || r.includes('support')) {
+            if (r.includes('devops') || r.includes('system') || r.includes('support') || r.includes('legacy')) {
                 return 'devops_capstone';
-            }
-            if (r.includes('data') || missionsStr.includes('embeddings') || missionsStr.includes('vector') || missionsStr.includes('rag') || r.includes('analyst') || r.includes('ai engineer')) {
-                return 'ai_rag';
             }
             return 'fullstack_api';
         }
@@ -1045,7 +1043,7 @@
             
             // Filter candidates by active tab
             const filteredCandidates = appState.candidates.filter(cand => {
-                return getEngineeringSection(cand.member.jobRole, cand) === appState.activeEngineeringSection;
+                return getEngineeringSection(cand.member.jobRole) === appState.activeEngineeringSection;
             });
 
             if (filteredCandidates.length === 0) {
