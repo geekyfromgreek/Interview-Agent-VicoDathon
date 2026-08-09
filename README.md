@@ -145,6 +145,13 @@ uvicorn app.main:app --reload --port 8000
 
 ---
 
+## 👥 Team Members
+
+* **Kaushik Ratnaparkhi**
+* **Spandan Ghodke**
+
+---
+
 ## 🎓 Problem Statement Reference
 
 Built for the **AI Cohort 31-Day Enterprise Engineering Hackathon**. Assesses candidates on RAG, Vector Databases, Prompt Engineering, Agentic AI, MCP Protocol, and Deployment.

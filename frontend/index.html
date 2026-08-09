@@ -1854,13 +1854,26 @@
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
+            // Append container off-screen to document.body so html2canvas can measure & render DOM layout
+            container.style.position = 'fixed';
+            container.style.left = '-9999px';
+            container.style.top = '0';
+            container.style.width = '800px';
+            document.body.appendChild(container);
+
             if (window.html2pdf) {
-                html2pdf().set(opt).from(container).save();
+                html2pdf().set(opt).from(container).save().then(() => {
+                    if (document.body.contains(container)) document.body.removeChild(container);
+                }).catch(err => {
+                    console.error("PDF export failed:", err);
+                    if (document.body.contains(container)) document.body.removeChild(container);
+                });
             } else {
                 const printWindow = window.open('', '_blank');
                 printWindow.document.write(`<html><head><title>${filename}</title></head><body style="padding:0; margin:0;">${container.innerHTML}</body></html>`);
                 printWindow.document.close();
                 printWindow.print();
+                if (document.body.contains(container)) document.body.removeChild(container);
             }
         }
     </script>
