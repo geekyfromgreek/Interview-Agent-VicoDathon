@@ -3,7 +3,7 @@
     {
       "member": {
         "id": "CAND-001",
-        "name": "Aarav Sharma",
+        "name": "Sarah Johnson",
         "jobRole": "Senior Data Engineer",
         "yearsExperience": 9,
         "education": "MS Computer Science",
@@ -79,7 +79,7 @@
     {
       "member": {
         "id": "CAND-002",
-        "name": "Rohan Mehta",
+        "name": "Alex Turner",
         "jobRole": "Backend Software Engineer",
         "yearsExperience": 5,
         "education": "B.Tech Computer Science",
@@ -156,7 +156,7 @@
     {
       "member": {
         "id": "CAND-003",
-        "name": "Divya Iyer",
+        "name": "Emily Chen",
         "jobRole": "AI Engineer",
         "yearsExperience": 6,
         "education": "MS Artificial Intelligence",
@@ -233,7 +233,7 @@
     {
       "member": {
         "id": "CAND-004",
-        "name": "Kabir Malhotra",
+        "name": "David Miller",
         "jobRole": "Business Analyst",
         "yearsExperience": 8,
         "education": "MBA",
@@ -309,7 +309,7 @@
     {
       "member": {
         "id": "CAND-005",
-        "name": "Vikram Patel",
+        "name": "Michael Brown",
         "jobRole": "DevOps Engineer",
         "yearsExperience": 10,
         "education": "B.Tech Information Technology",
@@ -386,7 +386,7 @@
     {
       "member": {
         "id": "CAND-006",
-        "name": "Anjali Rao",
+        "name": "Wendy Foster",
         "jobRole": "Marketing Manager",
         "yearsExperience": 12,
         "education": "BA Marketing",
@@ -461,7 +461,7 @@
     {
       "member": {
         "id": "CAND-007",
-        "name": "Ishaan Gupta",
+        "name": "Ethan Brooks",
         "jobRole": "Computer Science Intern",
         "yearsExperience": 0,
         "education": "BS Computer Science (in progress)",
@@ -536,7 +536,7 @@
     {
       "member": {
         "id": "CAND-008",
-        "name": "Devendra Deshmukh",
+        "name": "Harold Whitfield",
         "jobRole": "Distinguished Engineer",
         "yearsExperience": 28,
         "education": "BS Computer Science",
@@ -694,7 +694,7 @@
     {
       "member": {
         "id": "CAND-010",
-        "name": "Gaurav Joshi",
+        "name": "Gerald Combs",
         "jobRole": "IT Support Specialist",
         "yearsExperience": 20,
         "education": "AAS Information Technology",
@@ -769,7 +769,7 @@
     {
       "member": {
         "id": "CAND-011",
-        "name": "Meera Sen",
+        "name": "Mia Alvarez",
         "jobRole": "UX Researcher",
         "yearsExperience": 6,
         "education": "MA Human-Computer Interaction",
@@ -841,7 +841,7 @@
     {
       "member": {
         "id": "CAND-012",
-        "name": "Chirag Verma",
+        "name": "Chen Wei",
         "jobRole": "Mobile App Developer",
         "yearsExperience": 7,
         "education": "BS Computer Engineering",
@@ -995,7 +995,7 @@
     {
       "member": {
         "id": "CAND-014",
-        "name": "Bhavna Kulkarni",
+        "name": "Bethany Cole",
         "jobRole": "HR Manager",
         "yearsExperience": 10,
         "education": "BA Human Resources",
@@ -1068,7 +1068,7 @@
     {
       "member": {
         "id": "CAND-015",
-        "name": "Nikhil Nair",
+        "name": "Noah Kim",
         "jobRole": "Principal Architect",
         "yearsExperience": 20,
         "education": "MS Computer Science",
@@ -1143,7 +1143,7 @@
     {
       "member": {
         "id": "CAND-016",
-        "name": "Isha Reddy",
+        "name": "Isabella Rossi",
         "jobRole": "Software Engineer",
         "yearsExperience": 5,
         "education": "BS Computer Science",
@@ -1212,7 +1212,7 @@
     {
       "member": {
         "id": "CAND-017",
-        "name": "Tarun Bannerjee",
+        "name": "Tyler Brooks",
         "jobRole": "Junior Developer",
         "yearsExperience": 0,
         "education": "GED + Coding Bootcamp Certificate",
@@ -1289,7 +1289,7 @@
     {
       "member": {
         "id": "CAND-018",
-        "name": "Deepa Krishnan",
+        "name": "Diane Foster",
         "jobRole": "AI Engineer",
         "yearsExperience": 4,
         "education": "MS Computer Science",
@@ -1366,7 +1366,7 @@
     {
       "member": {
         "id": "CAND-019",
-        "name": "Farhan Qureshi",
+        "name": "Frank DeLuca",
         "jobRole": "Legacy Systems Engineer",
         "yearsExperience": 25,
         "education": "BS Computer Science",
