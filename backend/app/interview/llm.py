@@ -140,6 +140,7 @@ def generate_question(
         )
     }
     persona_instruction = persona_prompts.get(persona, persona_prompts["Pragmatic Architect"])
+    last_exc = None
 
     system_prompt = (
         f"{persona_instruction}\n"
@@ -186,6 +187,7 @@ def generate_question(
             }
     except Exception as exc:
         logger.error("LLM generate_question failed on initial try: %s. Retrying live Groq call...", exc)
+        last_exc = exc
 
     # Secondary Groq call with direct text prompt to guarantee 100% LLM output
     for model_name in GROQ_MODELS:
@@ -209,7 +211,10 @@ def generate_question(
                 }
         except Exception as retry_err:
             logger.warning("Secondary Groq model %s failed: %s", model_name, retry_err)
+            last_exc = retry_err
 
+    if last_exc:
+        raise last_exc
     raise RuntimeError("Groq API could not generate question across all models.")
 
 
