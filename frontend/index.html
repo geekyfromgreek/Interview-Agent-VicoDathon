@@ -1491,7 +1491,19 @@
         }
 
         function renderFeedbackReport() {
-            if (!appState.feedback) return '';
+            if (!appState.feedback) {
+                return `
+                    <main class="max-w-4xl mx-auto px-margin-mobile md:px-stack-lg py-stack-lg min-h-[60vh] flex flex-col items-center justify-center text-center">
+                        <span class="material-symbols-outlined text-primary text-6xl mb-4">assessment</span>
+                        <h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">No Report Available</h2>
+                        <p class="font-body-md text-body-md text-on-surface-variant max-w-md mb-6">Complete an interview session to generate a detailed performance report. Your report will include strengths, gaps, and personalized recommendations.</p>
+                        <button class="bg-primary-container text-on-primary font-bold px-6 py-3 rounded-xl hover:bg-primary transition-colors active:scale-95 duration-150 flex items-center gap-2 shadow-md" onclick="navigateTo('candidate_select')">
+                            <span class="material-symbols-outlined">play_arrow</span>
+                            Start Interview
+                        </button>
+                    </main>
+                `;
+            }
 
             let strengthsHtml = '';
             appState.feedback.strengths.forEach(str => {
@@ -1877,40 +1889,60 @@
             `;
 
             const filename = `interview_report_${userName.toLowerCase().replace(/\s+/g, '_')}.pdf`;
-            const opt = {
-                margin:       [0.1, 0.1, 0.1, 0.1],
-                filename:     filename,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, windowWidth: 1024, scrollX: 0, scrollY: 0 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-            // Mobile-friendly rendering container positioned behind layout so iOS/Android WebKit rasterizes DOM
-            container.style.position = 'absolute';
-            container.style.left = '0';
-            container.style.top = '0';
-            container.style.width = '800px';
-            container.style.zIndex = '-9999';
-            container.style.opacity = '0.99';
-            container.style.pointerEvents = 'none';
-            container.style.backgroundColor = '#ffffff';
-            document.body.appendChild(container);
-
-            if (window.html2pdf) {
-                html2pdf().set(opt).from(container).save().then(() => {
-                    setTimeout(() => {
-                        if (document.body.contains(container)) document.body.removeChild(container);
-                    }, 500);
-                }).catch(err => {
-                    console.error("PDF export failed:", err);
-                    if (document.body.contains(container)) document.body.removeChild(container);
-                });
-            } else {
+            if (isMobile) {
+                // Mobile: Open print-friendly window (html2canvas fails on mobile WebKit)
                 const printWindow = window.open('', '_blank');
-                printWindow.document.write(`<html><head><title>${filename}</title></head><body style="padding:0; margin:0;">${container.innerHTML}</body></html>`);
-                printWindow.document.close();
-                printWindow.print();
-                if (document.body.contains(container)) document.body.removeChild(container);
+                if (printWindow) {
+                    printWindow.document.write(`
+                        <html>
+                        <head>
+                            <title>${filename}</title>
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <style>
+                                @media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }
+                                body { margin: 0; padding: 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+                            </style>
+                        </head>
+                        <body>${container.innerHTML}</body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                    setTimeout(() => { printWindow.print(); }, 400);
+                } else {
+                    alert('Please allow pop-ups to download the PDF report.');
+                }
+            } else {
+                // Desktop: Use html2pdf with html2canvas for pixel-perfect export
+                const opt = {
+                    margin:       [0.1, 0.1, 0.1, 0.1],
+                    filename:     filename,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true, windowWidth: 1024, scrollX: 0, scrollY: 0 },
+                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+
+                container.style.position = 'absolute';
+                container.style.left = '0';
+                container.style.top = '0';
+                container.style.width = '800px';
+                container.style.zIndex = '-9999';
+                container.style.opacity = '0.99';
+                container.style.pointerEvents = 'none';
+                container.style.backgroundColor = '#ffffff';
+                document.body.appendChild(container);
+
+                if (window.html2pdf) {
+                    html2pdf().set(opt).from(container).save().then(() => {
+                        setTimeout(() => {
+                            if (document.body.contains(container)) document.body.removeChild(container);
+                        }, 500);
+                    }).catch(err => {
+                        console.error("PDF export failed:", err);
+                        if (document.body.contains(container)) document.body.removeChild(container);
+                    });
+                }
             }
         }
     </script>
