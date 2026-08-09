@@ -563,6 +563,16 @@ render+vercel
 
 One-line summary: User requesting instructions to split deployment between Render (Python backend API) and Vercel (static frontend hosting).
 
+---
+
+## Prompt 36: Backend Cold Start & Load Time Query
+```
+okahy both live, now how much time to laod backend
+```
+
+One-line summary: User confirming both Vercel and Render deployments are live and asking about Render backend cold start/load times.
+
+
 
 
 
