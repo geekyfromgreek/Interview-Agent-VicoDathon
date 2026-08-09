@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 # ─── App ─────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="InterviewReady AI",
+    title="interviewIQ",
     description="Post-cohort technical interview practice and confidence builder.",
     version="1.0.0",
 )
@@ -110,12 +110,13 @@ def _handle_start(req: InterviewRequest) -> InterviewResponse:
                 len(focus_plan), [e["day"] for e in focus_plan])
 
     # 2. Initialize session
-    session = create_session(session_id, candidate, focus_plan, persona)
+    user_name = req.userName or "Candidate"
+    session = create_session(session_id, candidate, focus_plan, persona, user_name)
 
     # 3. Get the first focus area
     if not focus_plan:
         return InterviewResponse(
-            reply="Welcome! Let's have a conversation about your learning journey.",
+            reply=f"Welcome {user_name}! Let's have a conversation about your learning journey.",
             done=False,
             focusReason="General assessment",
             moduleN=1,
@@ -124,10 +125,15 @@ def _handle_start(req: InterviewRequest) -> InterviewResponse:
     first_focus = focus_plan[0]
 
     # 4. Generate the first question via LLM
-    candidate_name = candidate.get("member", {}).get("name", "there")
     candidate_role = candidate.get("member", {}).get("jobRole", "candidate")
 
-    result = llm.generate_question(candidate_name, candidate_role, first_focus, session.persona)
+    result = llm.generate_question(
+        candidate_name=candidate.get("member", {}).get("name", "there"),
+        candidate_role=candidate_role,
+        focus_area=first_focus,
+        persona=session.persona,
+        user_name=user_name
+    )
 
     # 5. Update session state
     session.transcript.append({"role": "interviewer", "content": result["reply"]})
@@ -188,6 +194,7 @@ def _handle_turn(req: InterviewRequest) -> InterviewResponse:
         candidate_name=candidate_name,
         candidate_role=candidate_role,
         persona=session.persona,
+        user_name=session.user_name,
     )
 
     verdict = grading.get("verdict", "partial")
@@ -244,6 +251,7 @@ def _end_interview(
         verdicts=session.verdicts,
         candidate_name=candidate_name,
         candidate_role=candidate_role,
+        user_name=session.user_name,
     )
 
     feedback = Feedback(

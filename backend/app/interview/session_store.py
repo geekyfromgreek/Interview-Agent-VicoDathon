@@ -22,6 +22,7 @@ class Session:
     candidate: dict[str, Any]
     focus_plan: list[dict[str, Any]]
     persona: str = "Pragmatic Architect"
+    user_name: str = "Candidate"
     transcript: list[dict[str, str]] = field(default_factory=list)
     questions_asked: int = 0
     days_covered: set[int] = field(default_factory=set)
@@ -39,9 +40,10 @@ def create_session(
     candidate: dict[str, Any],
     focus_plan: list[dict[str, Any]],
     persona: str = "Pragmatic Architect",
+    user_name: str = "Candidate",
 ) -> Session:
     """Initialize and store a new interview session."""
-    session = Session(candidate=candidate, focus_plan=focus_plan, persona=persona)
+    session = Session(candidate=candidate, focus_plan=focus_plan, persona=persona, user_name=user_name)
     _sessions[session_id] = session
     return session
 

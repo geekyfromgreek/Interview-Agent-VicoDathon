@@ -78,6 +78,7 @@ def generate_question(
     candidate_role: str,
     focus_area: dict[str, Any],
     persona: str = "Pragmatic Architect",
+    user_name: str = "Candidate",
 ) -> dict[str, Any]:
     """Generate the first (or next) interview question for a focus area.
 
@@ -105,6 +106,7 @@ def generate_question(
 
     system_prompt = (
         f"{persona_instruction}\n"
+        f"Greet the candidate as '{user_name}' (e.g. 'Hello {user_name}, let's talk about...').\n"
         "Ask ONE clear, specific question that tests whether the candidate truly understands "
         "the topic — not a yes/no question. Personalise the question to their role.\n\n"
         "You MUST respond with a JSON object and nothing else:\n"
@@ -175,6 +177,7 @@ def grade_and_continue(
     candidate_name: str,
     candidate_role: str,
     persona: str = "Pragmatic Architect",
+    user_name: str = "Candidate",
 ) -> dict[str, Any]:
     """Grade the candidate's latest answer AND generate the next question in ONE call.
 
@@ -244,15 +247,14 @@ def grade_and_continue(
 
     system_prompt = (
         f"{persona_instruction}\n"
-        "You are grading a technical interview answer and optionally generating "
+        f"You are grading a technical interview answer for '{user_name}' and optionally generating "
         "the next question. Be fair — award 'strong' for solid understanding, "
         "'partial' for surface-level answers, 'gap' for wrong or missing knowledge.\n\n"
         "SPECIAL RULE FOR CANDIDATE QUESTIONS/GREETINGS/STALLS:\n"
         "If the candidate's latest message is a generic question, query, greeting, or "
         "request for clarification (e.g. 'what is ai?', 'hello', 'can you explain?', etc.) "
         "instead of answering the technical question:\n"
-        "1. GREET THEM BACK or answer their generic query directly and conversationally in the first person "
-        "(e.g., 'Hello [Candidate Name]! Let's get back to our question.' or '[Concept Definition]. Now, returning to our topic...').\n"
+        f"1. GREET THEM BACK or answer their generic query directly and conversationally (e.g., 'Hello {user_name}! Let's get back to our question.' or '[Concept Definition]. Now, returning to our topic...').\n"
         "2. Keep the focus index on the CURRENT topic (set shouldEnd to false, do not advance to the next topic).\n"
         "3. Set the verdict to 'gap' for this turn (since they did not answer the technical question).\n"
         "4. Prompt them again to answer the technical question.\n\n"
@@ -382,6 +384,7 @@ def generate_feedback(
     verdicts: list[str],
     candidate_name: str,
     candidate_role: str,
+    user_name: str = "Candidate",
 ) -> dict[str, Any]:
     """Generate final feedback from the full interview.
 
@@ -399,8 +402,8 @@ def generate_feedback(
     )
 
     system_prompt = (
-        "You are writing a final interview feedback report.  Every bullet point MUST "
-        "reference something specific the candidate actually said — no generic filler.\n\n"
+        f"You are writing a final technical assessment feedback report for '{user_name}' who practiced a simulated technical interview.\n"
+        "Every bullet point MUST reference something specific they actually said — no generic filler.\n\n"
         "You MUST respond with a JSON object and nothing else:\n"
         "{\n"
         '  "summary": "<2-3 sentence overall assessment>",\n'

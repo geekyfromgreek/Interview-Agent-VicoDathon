@@ -26,6 +26,7 @@ class InterviewRequest(BaseModel):
     candidate: Optional[dict] = None
     message: Optional[str] = None
     persona: Optional[str] = None
+    userName: Optional[str] = None
 
 
 # ─── Response components ─────────────────────────────────────────────

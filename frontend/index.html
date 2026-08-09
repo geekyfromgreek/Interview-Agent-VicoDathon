@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>InterviewReady AI — Post-Cohort Technical Prep</title>
+    <title>interviewIQ — Post-Cohort Technical Prep</title>
     
     <!-- Scripts & Tailwind CSS Config -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -137,15 +137,66 @@
 
     <!-- Top Navigation Header -->
     <header class="fixed top-0 w-full z-50 flex items-center justify-between px-margin-mobile h-14 bg-surface border-b border-border-subtle shadow-sm">
-        <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('landing')">
-            <span class="material-symbols-outlined text-primary text-2xl">terminal</span>
-            <span class="font-label-caps text-label-caps tracking-widest text-on-surface">INTERVIEW_READY</span>
+        <div class="flex items-center gap-3">
+            <button id="menu-btn" class="p-1 rounded hover:bg-surface-container flex items-center justify-center text-on-surface transition-colors" onclick="toggleMenu()">
+                <span class="material-symbols-outlined text-2xl">menu</span>
+            </button>
+            <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('landing')">
+                <span class="material-symbols-outlined text-primary text-xl">terminal</span>
+                <span class="font-label-caps text-label-caps tracking-widest text-on-surface">interviewIQ</span>
+            </div>
         </div>
         <div class="flex items-center gap-stack-md">
             <span id="header-candidate-badge" class="hidden font-body-md text-body-md text-on-surface font-bold bg-surface-gray border border-border-subtle px-3 py-1 rounded"></span>
             <button id="header-cta-btn" class="bg-primary-container text-on-primary font-body-md px-4 py-2 rounded-lg font-bold hover:bg-surface-tint active:scale-95 duration-150 transition-colors" onclick="navigateTo('candidate_select')">Start Interview</button>
         </div>
     </header>
+
+    <!-- Slide-over Menu Drawer Overlay -->
+    <div id="menu-drawer-overlay" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden transition-opacity duration-300 opacity-0" onclick="toggleMenu()">
+        <!-- Drawer Panel -->
+        <div id="menu-drawer-panel" class="absolute left-0 top-0 h-full w-[280px] bg-surface border-r border-border-subtle shadow-2xl flex flex-col transition-transform duration-300 transform -translate-x-full" onclick="event.stopPropagation()">
+            <!-- Drawer Header -->
+            <div class="flex items-center justify-between p-4 border-b border-border-subtle h-14">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">terminal</span>
+                    <span class="font-label-caps text-label-caps tracking-widest text-on-surface">interviewIQ</span>
+                </div>
+                <button class="p-1 rounded hover:bg-surface-container flex items-center justify-center" onclick="toggleMenu()">
+                    <span class="material-symbols-outlined text-xl">close</span>
+                </button>
+            </div>
+            
+            <!-- Drawer Items -->
+            <nav class="flex-grow overflow-y-auto p-4 flex flex-col gap-2">
+                <button class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container text-left font-bold text-sm text-on-surface w-full transition-colors" onclick="navigateTo('landing')">
+                    <span class="material-symbols-outlined text-primary">home</span>
+                    Landing Home
+                </button>
+                <button class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container text-left font-bold text-sm text-on-surface w-full transition-colors" onclick="navigateTo('candidate_select')">
+                    <span class="material-symbols-outlined text-primary">person_add</span>
+                    Select Candidate
+                </button>
+                <button class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container text-left font-bold text-sm text-on-surface w-full transition-colors" onclick="navigateTo('overall_progress')">
+                    <span class="material-symbols-outlined text-primary">analytics</span>
+                    Overall Progress
+                </button>
+                <button class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container text-left font-bold text-sm text-on-surface w-full transition-colors" onclick="navigateTo('where_i_excel')">
+                    <span class="material-symbols-outlined text-primary">workspace_premium</span>
+                    Where I Excel
+                </button>
+                <button class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container text-left font-bold text-sm text-on-surface w-full transition-colors border-t border-border-subtle mt-4 pt-4" onclick="downloadLatestReport()">
+                    <span class="material-symbols-outlined text-primary">download</span>
+                    Download Last Report
+                </button>
+            </nav>
+            
+            <!-- Drawer Footer -->
+            <div class="p-4 border-t border-border-subtle bg-surface-gray">
+                <p class="text-xs text-on-surface-variant font-label-code">© 2026 interviewIQ</p>
+            </div>
+        </div>
+    </div>
 
     <!-- App Container -->
     <div id="app" class="w-full">
@@ -159,7 +210,7 @@
             <a class="font-label-code text-label-code text-on-surface-variant hover:text-on-surface opacity-80 hover:opacity-100 transition-opacity" href="#">Privacy</a>
             <a class="font-label-code text-label-code text-on-surface-variant hover:text-on-surface opacity-80 hover:opacity-100 transition-opacity" href="#">Support</a>
         </div>
-        <p class="font-label-caps text-label-caps text-on-surface-variant">© 2026 INTERVIEW_READY. COHORT_GRAD_SYSTEM_V1</p>
+        <p class="font-label-caps text-label-caps text-on-surface-variant">© 2026 interviewIQ. COHORT_GRAD_SYSTEM_V1</p>
     </footer>
 
     <!-- Main Logic Script -->
@@ -180,7 +231,8 @@
             feedback: null,
             activeEngineeringSection: 'ai_ml',
             selectedPersona: 'Pragmatic Architect',
-            showConfigPanel: false
+            showConfigPanel: false,
+            userName: localStorage.getItem('interviewiq_user_name') || ''
         };
 
         // Initialize App
@@ -220,6 +272,14 @@
         }
 
         function beginInterviewWithSelected() {
+            const nameInput = document.getElementById('user-name-input');
+            const nameVal = nameInput ? nameInput.value.trim() : '';
+            if (!nameVal) {
+                alert("Please enter your name to personalize the interview.");
+                return;
+            }
+            appState.userName = nameVal;
+            localStorage.setItem('interviewiq_user_name', nameVal);
             if (appState.selectedCandidate) {
                 startInterview(appState.selectedCandidate, appState.selectedPersona);
             }
@@ -245,9 +305,112 @@
             return 'product_other';
         }
 
+        // Hamburger Menu Controls
+        function toggleMenu() {
+            const drawer = document.getElementById('menu-drawer-overlay');
+            if (!drawer) return;
+            const isHidden = drawer.classList.contains('hidden');
+            toggleMenuDrawer(isHidden);
+        }
+
+        function toggleMenuDrawer(show) {
+            const drawer = document.getElementById('menu-drawer-overlay');
+            const panel = document.getElementById('menu-drawer-panel');
+            if (!drawer || !panel) return;
+
+            if (show) {
+                drawer.classList.remove('hidden');
+                setTimeout(() => {
+                    drawer.classList.remove('opacity-0');
+                    panel.classList.remove('-translate-x-full');
+                }, 10);
+            } else {
+                drawer.classList.add('opacity-0');
+                panel.classList.add('-translate-x-full');
+                setTimeout(() => {
+                    drawer.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        // Export Reports
+        function downloadLatestReport() {
+            if (!appState.feedback) {
+                alert("No report available yet. Please complete an interview session first!");
+                return;
+            }
+            downloadReportText(appState.userName, appState.selectedCandidate?.member?.jobRole, appState.selectedPersona, new Date().toLocaleDateString(), appState.feedback);
+        }
+
+        function downloadReportById(id) {
+            const history = JSON.parse(localStorage.getItem('interviewiq_history') || '[]');
+            const h = history.find(item => item.id === id);
+            if (!h) return;
+            downloadReportText(h.userName, h.candidateRole, h.persona, h.date, h.feedback);
+        }
+
+        function downloadReportText(userName, jobRole, persona, date, f) {
+            let md = `# Technical Assessment Report: ${userName}\n`;
+            md += `*Role: ${jobRole || "Software Engineer"}*\n`;
+            md += `*Interviewer Persona: ${persona}*\n`;
+            md += `*Date: ${date}*\n\n`;
+            md += `## Executive Summary\n${f.summary}\n\n`;
+            
+            md += `## Key Strengths\n`;
+            (f.strengths || []).forEach(s => { md += `- ${s}\n`; });
+            md += `\n`;
+            
+            md += `## Gaps & Areas of Improvement\n`;
+            (f.gaps || []).forEach(g => { md += `- ${g}\n`; });
+            md += `\n`;
+            
+            md += `## Recommended Next Steps\n`;
+            (f.next || []).forEach(n => { md += `- ${n}\n`; });
+            
+            const blob = new Blob([md], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `interview_report_${userName.toLowerCase().replace(/\s+/g, '_')}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Save Interview to History
+        function saveInterviewSessionToHistory(userName, candidate, persona, feedback, transcript) {
+            try {
+                const history = JSON.parse(localStorage.getItem('interviewiq_history') || '[]');
+                
+                let strong = 0;
+                let partial = 0;
+                let gap = 0;
+                transcript.forEach(t => {
+                    if (t.verdict === 'strong') strong++;
+                    if (t.verdict === 'partial') partial++;
+                    if (t.verdict === 'gap') gap++;
+                });
+
+                const record = {
+                    id: 'session-' + Date.now(),
+                    userName: userName || "Candidate",
+                    candidateName: candidate?.member?.name || "Unknown Candidate",
+                    candidateRole: candidate?.member?.jobRole || "Software Engineer",
+                    persona: persona,
+                    date: new Date().toLocaleDateString(),
+                    feedback: feedback,
+                    score: { strong, partial, gap }
+                };
+                
+                history.push(record);
+                localStorage.setItem('interviewiq_history', JSON.stringify(history));
+            } catch (err) {
+                console.error("Failed to save history:", err);
+            }
+        }
 
         function navigateTo(screen) {
             appState.currentScreen = screen;
+            toggleMenuDrawer(false); // Close drawer
             
             // Header states
             const headerBadge = document.getElementById('header-candidate-badge');
@@ -293,7 +456,8 @@
                     body: JSON.stringify({
                         sessionId: appState.sessionId,
                         candidate: candidate,
-                        persona: appState.selectedPersona
+                        persona: appState.selectedPersona,
+                        userName: appState.userName
                     })
                 });
 
@@ -368,6 +532,7 @@
                     if (data.done) {
                         // End of interview
                         appState.feedback = data.feedback;
+                        saveInterviewSessionToHistory(appState.userName, appState.selectedCandidate, appState.selectedPersona, data.feedback, appState.transcript);
                         navigateTo('feedback_report');
                         return;
                     } else {
@@ -439,6 +604,7 @@
                 };
             } finally {
                 appState.isTyping = false;
+                saveInterviewSessionToHistory(appState.userName, appState.selectedCandidate, appState.selectedPersona, appState.feedback, appState.transcript);
                 navigateTo('feedback_report');
             }
         }
@@ -468,6 +634,12 @@
                 case 'feedback_report':
                     container.innerHTML = renderFeedbackReport();
                     break;
+                case 'overall_progress':
+                    container.innerHTML = renderOverallProgress();
+                    break;
+                case 'where_i_excel':
+                    container.innerHTML = renderWhereIExcel();
+                    break;
             }
         }
 
@@ -492,17 +664,10 @@
                             </div>
                         </div>
                         
-                        <!-- Hero 3D Model Column -->
+                        <!-- Hero 3D Model Column (Borderless, Overflow Visible, Shifted Right) -->
                         <div class="md:col-span-5 w-full">
-                            <div class="relative w-full h-[320px] md:h-[380px] flex items-center justify-center bg-surface-gray border border-border-subtle rounded-2xl overflow-hidden shadow-md">
-                                <model-viewer src="coding.glb" alt="Office Worker" style="width: 100%; height: 100%;" shadow-intensity="1.5" environment-image="neutral" exposure="1" loading="eager" min-camera-orbit="auto auto auto" max-camera-orbit="auto auto auto" disable-pan autoplay></model-viewer>
-                                <div class="absolute bottom-4 left-4 font-label-caps text-[10px] tracking-wider bg-surface bg-opacity-75 backdrop-blur-sm border border-border-subtle px-3 py-1 rounded text-primary flex items-center gap-1.5 shadow-sm font-bold">
-                                    <span class="flex h-2 w-2 relative">
-                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-success opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-status-success"></span>
-                                    </span>
-                                    3D_MODEL_ACTIVE
-                                </div>
+                            <div class="relative w-full h-[320px] md:h-[450px] flex items-center justify-center bg-transparent border-none overflow-visible" style="transform: translateX(10%);">
+                                <model-viewer src="coding.glb" alt="Office Worker" style="width: 150%; height: 150%;" shadow-intensity="2" shadow-softness="0.4" environment-image="neutral" exposure="1.6" loading="eager" autoplay></model-viewer>
                             </div>
                         </div>
                     </section>
@@ -599,6 +764,11 @@
                             <p class="text-sm text-on-surface-variant">${cand.member.jobRole} • ${cand.member.yearsExperience} yrs exp</p>
                             
                             <div class="flex flex-col gap-2">
+                                <label class="font-bold text-sm text-on-surface-variant">Your Name:</label>
+                                <input type="text" id="user-name-input" class="w-full border border-border-subtle rounded-lg p-2 bg-surface text-on-surface font-body-md" placeholder="Enter your name to personalize the session" value="${appState.userName || ''}" required />
+                            </div>
+
+                            <div class="flex flex-col gap-2">
                                 <label class="font-bold text-sm text-on-surface-variant">Elect Interviewer Persona:</label>
                                 <div class="flex flex-col gap-2">
                                     <button class="flex items-start gap-3 p-3 rounded-lg border text-left transition-all ${appState.selectedPersona === 'Pragmatic Architect' ? 'border-primary bg-surface-container-low' : 'border-border-subtle hover:border-on-surface-variant'}" onclick="setInterviewerPersona('Pragmatic Architect')">
@@ -650,6 +820,179 @@
 
                     <!-- Interview Config Overlay -->
                     ${configPanelHtml}
+                </main>
+            `;
+        }
+
+        function renderOverallProgress() {
+            const history = JSON.parse(localStorage.getItem('interviewiq_history') || '[]');
+            
+            let totalSessions = history.length;
+            let totalStrong = 0;
+            let totalPartial = 0;
+            let totalGap = 0;
+            
+            history.forEach(h => {
+                totalStrong += h.score?.strong || 0;
+                totalPartial += h.score?.partial || 0;
+                totalGap += h.score?.gap || 0;
+            });
+            
+            let totalVerdicts = totalStrong + totalPartial + totalGap;
+            let strongPercentage = totalVerdicts > 0 ? Math.round((totalStrong / totalVerdicts) * 100) : 0;
+            let partialPercentage = totalVerdicts > 0 ? Math.round((totalPartial / totalVerdicts) * 100) : 0;
+            let gapPercentage = totalVerdicts > 0 ? Math.round((totalGap / totalVerdicts) * 100) : 0;
+            
+            let historyHtml = '';
+            if (totalSessions === 0) {
+                historyHtml = `
+                    <div class="col-span-full text-center py-16 bg-surface-gray border border-border-subtle rounded-2xl p-6">
+                        <span class="material-symbols-outlined text-primary text-5xl mb-4">analytics</span>
+                        <h3 class="font-headline-md text-headline-md text-on-surface mb-2">No session history yet</h3>
+                        <p class="text-on-surface-variant font-body-md max-w-sm mx-auto mb-6">Complete a practice assessment to start tracking your progress over time and see where you stand.</p>
+                        <button class="bg-primary-container text-on-primary font-bold px-6 py-2.5 rounded-lg hover:bg-primary transition-colors active:scale-95 duration-150" onclick="navigateTo('candidate_select')">Select Candidate</button>
+                    </div>
+                `;
+            } else {
+                [...history].reverse().forEach(h => {
+                    historyHtml += `
+                        <div class="bg-surface border border-border-subtle rounded-xl p-4 flex flex-col gap-3 shadow-sm hover:shadow transition-shadow">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-headline-md text-sm text-on-surface font-bold">${h.userName}'s Session</h3>
+                                    <p class="text-xs text-on-surface-variant font-label-code mt-0.5">${h.candidateRole} • ${h.date}</p>
+                                    <p class="text-xs text-primary font-bold mt-1">Interviewer: ${h.persona}</p>
+                                </div>
+                                <button class="flex items-center gap-1.5 text-xs text-primary font-bold hover:text-primary-fixed border border-border-subtle px-2.5 py-1 rounded hover:bg-surface-gray transition-colors" onclick="downloadReportById('${h.id}')">
+                                    <span class="material-symbols-outlined text-[14px]">download</span>
+                                    Report
+                                </button>
+                            </div>
+                            <div class="flex gap-2 items-center border-t border-border-subtle pt-3">
+                                <span class="text-xs font-label-code text-on-surface-variant mr-1">Verdicts:</span>
+                                <span class="bg-status-success bg-opacity-10 text-status-success font-bold text-xs px-2.5 py-0.5 rounded-full border border-status-success border-opacity-20">${h.score.strong} Strong</span>
+                                <span class="bg-status-warning bg-opacity-10 text-status-warning font-bold text-xs px-2.5 py-0.5 rounded-full border border-status-warning border-opacity-20">${h.score.partial} Partial</span>
+                                <span class="bg-status-error bg-opacity-10 text-status-error font-bold text-xs px-2.5 py-0.5 rounded-full border border-status-error border-opacity-20">${h.score.gap} Gap</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            return `
+                <main class="max-w-4xl mx-auto px-margin-mobile md:px-stack-lg py-stack-lg min-h-[75vh]">
+                    <div class="mb-8">
+                        <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-base">Overall Interview Progress</h1>
+                        <p class="font-body-md text-body-md text-on-surface-variant">Track your growth, view performance indicators, and access previous technical reports.</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-surface border border-border-subtle p-4 rounded-xl shadow-sm text-center">
+                            <span class="material-symbols-outlined text-primary text-3xl mb-1">checklist_rtl</span>
+                            <p class="text-xs text-on-surface-variant font-label-caps uppercase">Completed</p>
+                            <h3 class="text-2xl font-bold text-on-surface mt-1">${totalSessions}</h3>
+                        </div>
+                        <div class="bg-surface border border-border-subtle p-4 rounded-xl shadow-sm text-center">
+                            <span class="material-symbols-outlined text-status-success text-3xl mb-1">sentiment_very_satisfied</span>
+                            <p class="text-xs text-on-surface-variant font-label-caps uppercase">Strong Ratio</p>
+                            <h3 class="text-2xl font-bold text-status-success mt-1">${strongPercentage}%</h3>
+                        </div>
+                        <div class="bg-surface border border-border-subtle p-4 rounded-xl shadow-sm text-center">
+                            <span class="material-symbols-outlined text-status-warning text-3xl mb-1">sentiment_neutral</span>
+                            <p class="text-xs text-on-surface-variant font-label-caps uppercase">Partial Ratio</p>
+                            <h3 class="text-2xl font-bold text-status-warning mt-1">${partialPercentage}%</h3>
+                        </div>
+                        <div class="bg-surface border border-border-subtle p-4 rounded-xl shadow-sm text-center">
+                            <span class="material-symbols-outlined text-status-error text-3xl mb-1">sentiment_dissatisfied</span>
+                            <p class="text-xs text-on-surface-variant font-label-caps uppercase">Gap Ratio</p>
+                            <h3 class="text-2xl font-bold text-status-error mt-1">${gapPercentage}%</h3>
+                        </div>
+                    </div>
+                    
+                    <h2 class="font-headline-md text-headline-md text-on-surface mb-4">Practice Session Log</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+                        ${historyHtml}
+                    </div>
+                </main>
+            `;
+        }
+
+        function renderWhereIExcel() {
+            let totalMissions = { ai_ml: 0, backend_data: 0, devops_systems: 0, product_other: 0 };
+            let passedMissions = { ai_ml: 0, backend_data: 0, devops_systems: 0, product_other: 0 };
+            
+            (appState.candidates || []).forEach(cand => {
+                const sect = getEngineeringSection(cand.member.jobRole);
+                (cand.missions || []).forEach(m => {
+                    totalMissions[sect]++;
+                    if (m.passed) passedMissions[sect]++;
+                });
+            });
+            
+            let aiBase = totalMissions.ai_ml > 0 ? Math.round((passedMissions.ai_ml / totalMissions.ai_ml) * 100) : 65;
+            let backendBase = totalMissions.backend_data > 0 ? Math.round((passedMissions.backend_data / totalMissions.backend_data) * 100) : 70;
+            let devopsBase = totalMissions.devops_systems > 0 ? Math.round((passedMissions.devops_systems / totalMissions.devops_systems) * 100) : 55;
+            let productBase = totalMissions.product_other > 0 ? Math.round((passedMissions.product_other / totalMissions.product_other) * 100) : 80;
+
+            const history = JSON.parse(localStorage.getItem('interviewiq_history') || '[]');
+            history.forEach(h => {
+                const sect = getEngineeringSection(h.candidateRole);
+                const strongCount = h.score?.strong || 0;
+                const totalGraded = strongCount + (h.score?.partial || 0) + (h.score?.gap || 0);
+                if (totalGraded > 0) {
+                    const ratio = strongCount / totalGraded;
+                    const delta = Math.round((ratio - 0.5) * 30);
+                    if (sect === 'ai_ml') aiBase = Math.max(10, Math.min(100, aiBase + delta));
+                    if (sect === 'backend_data') backendBase = Math.max(10, Math.min(100, backendBase + delta));
+                    if (sect === 'devops_systems') devopsBase = Math.max(10, Math.min(100, devopsBase + delta));
+                    if (sect === 'product_other') productBase = Math.max(10, Math.min(100, productBase + delta));
+                }
+            });
+
+            const domains = [
+                { id: 'AI & Machine Learning', score: aiBase, desc: 'Advanced LLM prompt tuning, Vector DB embeddings, and RAG retrieval pipelines.' },
+                { id: 'Backend & Data Systems', score: backendBase, desc: 'Vector database schemas, relational indexing, memory management, and scalable APIs.' },
+                { id: 'Systems & DevOps', score: devopsBase, desc: 'Model Context Protocol (MCP) integrations, CI/CD pipeline automation, and container orchestration.' },
+                { id: 'Product & Technical Design', score: productBase, desc: 'Technical specifications, UX system maps, trade-off documentations, and product-led design flows.' }
+            ];
+            
+            domains.sort((a, b) => b.score - a.score);
+            const primaryDomain = domains[0];
+
+            return `
+                <main class="max-w-4xl mx-auto px-margin-mobile md:px-stack-lg py-stack-lg min-h-[75vh]">
+                    <div class="mb-8">
+                        <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-base">My Technical Competencies</h1>
+                        <p class="font-body-md text-body-md text-on-surface-variant">An analysis of your strengths and domain mastery based on curriculum achievements and practice evaluations.</p>
+                    </div>
+                    
+                    <div class="bg-primary bg-opacity-5 border border-primary border-opacity-20 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+                        <div class="flex-grow">
+                            <span class="bg-primary text-on-primary font-bold text-xs uppercase tracking-widest px-3 py-1 rounded-full font-label-caps">Core Competency</span>
+                            <h2 class="font-headline-lg text-xl text-on-surface mt-3 mb-1">${primaryDomain.id}</h2>
+                            <p class="font-body-md text-body-md text-on-surface-variant max-w-xl">${primaryDomain.desc}</p>
+                        </div>
+                        <div class="text-center shrink-0">
+                            <p class="text-xs text-on-surface-variant font-label-caps uppercase">Mastery Level</p>
+                            <h3 class="text-4xl font-black text-primary mt-1">${primaryDomain.score}%</h3>
+                        </div>
+                    </div>
+                    
+                    <h2 class="font-headline-md text-headline-md text-on-surface mb-6">Domain Evaluation Breakdown</h2>
+                    <div class="flex flex-col gap-6">
+                        ${domains.map(d => `
+                            <div class="bg-surface border border-border-subtle p-5 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-headline-md text-sm text-on-surface font-bold">${d.id}</h3>
+                                    <span class="font-label-code text-xs font-bold text-primary">${d.score}% Mastery</span>
+                                </div>
+                                <div class="w-full bg-surface-container-high rounded-full h-3 mb-3 overflow-hidden border border-border-subtle">
+                                    <div class="bg-primary h-full rounded-full transition-all duration-500" style="width: ${d.score}%"></div>
+                                </div>
+                                <p class="text-xs text-on-surface-variant font-body-md">${d.desc}</p>
+                            </div>
+                        `).join('')}
+                    </div>
                 </main>
             `;
         }
