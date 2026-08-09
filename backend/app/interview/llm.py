@@ -109,6 +109,39 @@ def generate_question(
     candidate_role: str,
     focus_area: dict[str, Any],
     persona: str = "Pragmatic Architect",
+    user_name: str = "Candidate",
+) -> dict[str, Any]:
+    """Generate initial interview question tailored to candidate and persona via Groq LLM."""
+    day_num = focus_area.get("day", 1)
+    scenario = SCENARIOS.get(day_num, {})
+    typical_question = scenario.get("typical_question", "")
+
+    persona_prompts = {
+        "Pragmatic Architect": (
+            "You are a pragmatic software architect technical interviewer. "
+            "Focus heavily on structural trade-offs, architecture decisions, database choices, and system design."
+        ),
+        "Rigorous Lead": (
+            "You are a tough, rigorous lead developer technical interviewer. "
+            "Keep questions direct and demanding, and grade answers strictly against exact technical terms."
+        ),
+        "Encouraging Mentor": (
+            "You are a friendly, encouraging technical mentor interviewer. "
+            "Frame questions supportively and provide helpful framing context."
+        )
+    }
+    persona_instruction = persona_prompts.get(persona, persona_prompts["Pragmatic Architect"])
+
+    system_prompt = (
+        f"{persona_instruction}\n"
+        f"Greet the candidate as '{user_name}' (e.g. 'Hello {user_name}, let's talk about...').\n"
+        "Ask ONE clear, specific question that tests whether the candidate truly understands "
+        "the topic — not a yes/no question. Personalise the question to their role.\n\n"
+        "You MUST respond with a JSON object and nothing else:\n"
+        '{"reply": "<your question>", "moduleN": <int>, "focusReason": "<short reason>"}'
+    )
+
+    user_prompt = (
         f"Candidate: {candidate_name} ({candidate_role})\n"
         f"Topic: Day {focus_area['day']} — {focus_area['title']}\n"
         f"Module: {focus_area['moduleN']}\n"
@@ -123,16 +156,14 @@ def generate_question(
     )
 
     try:
-        resp = _client.chat.completions.create(
-            model=_model,
+        raw = _call_groq_llm(
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=0.7,
             max_tokens=500,
+            temperature=0.7
         )
-        raw = resp.choices[0].message.content or ""
         parsed = _extract_json(raw)
         if parsed and "reply" in parsed:
             parsed.setdefault("moduleN", focus_area["moduleN"])
@@ -145,32 +176,10 @@ def generate_question(
                 "focusReason": focus_area["reason"],
             }
     except Exception as exc:
-        logger.error("LLM generate_question primary call failed: %s", exc)
-
-    # Retry with Groq LLM using alternative model or temperature to guarantee 100% LLM generation
-    for attempt in range(2):
-        try:
-            resp = _client.chat.completions.create(
-                model=_model,
-                messages=[
-                    {"role": "system", "content": f"{persona_instruction}\nGreet {user_name} and ask a unique technical question about {focus_area['title']}. Do NOT use static templates."},
-                    {"role": "user", "content": f"Candidate: {candidate_name} ({candidate_role}). Focus: {focus_area['title']} with tools {', '.join(focus_area['tools'])}. Ask a creative initial question."},
-                ],
-                temperature=0.7 + (attempt * 0.1),
-                max_tokens=400,
-            )
-            reply_text = resp.choices[0].message.content or ""
-            if reply_text.strip():
-                return {
-                    "reply": reply_text.strip(),
-                    "moduleN": focus_area["moduleN"],
-                    "focusReason": focus_area["reason"],
-                }
-        except Exception as retry_exc:
-            logger.error("LLM generate_question retry %d failed: %s", attempt + 1, retry_exc)
+        logger.error("LLM generate_question failed: %s", exc)
 
     return {
-        "reply": f"Welcome {user_name}! I'm {candidate_name} ({candidate_role}). Let's dive right into {focus_area['title']} — how have you practically designed and implemented solutions using {focus_area['tools'][0] if focus_area['tools'] else 'this stack'}?",
+        "reply": f"Welcome {user_name}! Let's discuss {focus_area['title']}. How have you applied {focus_area.get('tools', ['this topic'])[0]} in your production projects?",
         "moduleN": focus_area["moduleN"],
         "focusReason": focus_area["reason"],
     }
