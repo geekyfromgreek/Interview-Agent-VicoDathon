@@ -34,7 +34,7 @@ _PROVIDER_URLS: dict[str, str] = {
     "openai": "https://api.openai.com/v1",
 }
 
-_api_key = os.getenv("LLM_API_KEY", "")
+_api_key = os.getenv("LLM_API_KEY") or os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY") or ""
 _provider = os.getenv("LLM_PROVIDER", "groq").lower()
 _model = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
 _base_url = _PROVIDER_URLS.get(_provider, _PROVIDER_URLS["groq"])
@@ -79,13 +79,21 @@ GROQ_MODELS = [
 ]
 
 
+def _get_client() -> OpenAI:
+    api_key = os.getenv("LLM_API_KEY") or os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY") or _api_key
+    provider = os.getenv("LLM_PROVIDER", "groq").lower()
+    base_url = _PROVIDER_URLS.get(provider, _PROVIDER_URLS["groq"])
+    return OpenAI(api_key=api_key or "mock_key", base_url=base_url)
+
+
 def _call_groq_llm(messages: list[dict[str, str]], max_tokens: int = 650, temperature: float = 0.7) -> str:
     """Execute Groq API call with model fallback chain so Groq LLM calls NEVER fail."""
+    client = _get_client()
     last_exc = None
     for model_name in GROQ_MODELS:
         try:
             logger.info("Calling Groq API model: %s", model_name)
-            resp = _client.chat.completions.create(
+            resp = client.chat.completions.create(
                 model=model_name,
                 messages=messages,
                 temperature=temperature,
