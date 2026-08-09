@@ -65,26 +65,46 @@ HARD_CAP_QUESTIONS = 12
 )
 async def interview(req: InterviewRequest) -> InterviewResponse:
     """Single interview endpoint handling START, TURN, and END flows."""
-
-    # ── Validate: must have either candidate (START) or message (TURN)
-    if req.candidate is not None:
-        return _handle_start(req)
-    elif req.message is not None:
-        return _handle_turn(req)
-    else:
-        raise HTTPException(
-            status_code=422,
-            detail="Request must contain either 'candidate' (start) or 'message' (turn).",
-        )
+    global _last_error
+    try:
+        # ── Validate: must have either candidate (START) or message (TURN)
+        if req.candidate is not None:
+            return _handle_start(req)
+        elif req.message is not None:
+            return _handle_turn(req)
+        else:
+            raise HTTPException(
+                status_code=422,
+                detail="Request must contain either 'candidate' (start) or 'message' (turn).",
+            )
+    except Exception as e:
+        _last_error = e
+        logger.exception("Error in /api/interview endpoint")
+        raise e
 
 
 # ─── Data Endpoints ──────────────────────────────────────────────────
+
+_last_error = None
 
 @app.get("/health")
 @app.get("/api/health")
 async def health_check():
     """Keep-alive ping endpoint for UptimeRobot / Cron pinger services."""
     return {"status": "ok", "service": "interviewIQ Engine"}
+
+
+@app.get("/api/debug")
+async def debug_status():
+    global _last_error
+    import os
+    env_keys = {k: "SET" for k in os.environ if any(x in k.upper() for x in ["API", "KEY", "SECRET", "PROVIDER", "MODEL"])}
+    return {
+        "last_error": str(_last_error) if _last_error else "None",
+        "env_keys": env_keys,
+        "llm_provider": os.getenv("LLM_PROVIDER", "groq"),
+        "llm_model": os.getenv("LLM_MODEL", "llama-3.3-70b-versatile"),
+    }
 
 
 @app.get("/api/candidates")
