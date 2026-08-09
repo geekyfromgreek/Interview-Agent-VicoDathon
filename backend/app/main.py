@@ -211,9 +211,14 @@ def _handle_turn(req: InterviewRequest) -> InterviewResponse:
     if should_end:
         return _end_interview(session, verdict, candidate_name, candidate_role)
 
-    # 7. Continue: advance focus index, update session, return next question
-    session.current_focus_index += 1
-    next_question = grading.get("nextQuestion", "Let's continue — could you expand on that?")
+    next_question = grading.get("nextQuestion")
+    if not next_question:
+        if session.current_focus_index < len(session.focus_plan):
+            curr_topic = session.focus_plan[session.current_focus_index]
+            next_question = f"Let's move forward — regarding {curr_topic['title']}, how would you approach this in production?"
+        else:
+            next_question = "Reflecting on your learning journey overall, what was the most important engineering trade-off you evaluated?"
+
     next_moduleN = grading.get("moduleN", 0)
     next_focusReason = grading.get("focusReason", "")
 

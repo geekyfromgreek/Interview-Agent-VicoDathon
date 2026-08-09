@@ -474,6 +474,55 @@ Technical Specification ,also suggest me where i can deploy this full stack agen
 
 One-line summary: User sharing the complete hackathon problem statement to identify missing requirements/gaps and asking for deployment platform recommendations.
 
+---
+
+## Prompt 25: Eliminate Repetitive Fallback Text Request
+```
+ THIS LINE  is repetetive and not needed, i need a new answeer to each user query or answer
+```
+
+One-line summary: User requesting to remove repetitive fallback strings like "Let's continue — could you expand on that?" and generate unique, contextual questions dynamically for every response.
+
+---
+
+## Prompt 26: Railway Full-Stack Deployment Query
+```
+can railwahy handle full stack deployment
+```
+
+One-line summary: User asking if Railway can handle deploying the complete full-stack application (FastAPI backend + Vanilla frontend).
+
+---
+
+## Prompt 27: Step-by-Step Railway Deployment Guide Request
+```
+guide
+```
+
+One-line summary: User providing a screenshot of Railway Project Settings and requesting step-by-step guidance to connect GitHub, set environment variables, and generate a public deployment domain.
+
+---
+
+## Prompt 28: Railway Target Port Prompt Query
+```
+[Screenshot showing Railway Generate Service Domain modal: "Enter the port your app is listening on"]
+```
+
+One-line summary: User providing a screenshot of Railway's target port prompt and asking which port to enter for the service domain generation.
+
+---
+
+## Prompt 29: Railway Free Limit Query & 100% Free Alternatives Request
+```
+it has 5 dolar limit
+```
+
+One-line summary: User noting Railway's $5 trial limit and requesting a 100% free alternative platform (Render.com) with no credit card requirement.
+
+
+
+
+
 
 
 

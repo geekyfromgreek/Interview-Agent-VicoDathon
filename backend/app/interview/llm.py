@@ -250,21 +250,17 @@ def grade_and_continue(
         f"You are grading a technical interview answer for '{user_name}' and optionally generating "
         "the next question. Be fair — award 'strong' for solid understanding, "
         "'partial' for surface-level answers, 'gap' for wrong or missing knowledge.\n\n"
-        "SPECIAL RULE FOR CANDIDATE QUESTIONS/GREETINGS/STALLS:\n"
-        "If the candidate's latest message is a generic question, query, greeting, or "
-        "request for clarification (e.g. 'what is ai?', 'hello', 'can you explain?', etc.) "
-        "instead of answering the technical question:\n"
-        f"1. GREET THEM BACK or answer their generic query directly and conversationally (e.g., 'Hello {user_name}! Let's get back to our question.' or '[Concept Definition]. Now, returning to our topic...').\n"
-        "2. Keep the focus index on the CURRENT topic (set shouldEnd to false, do not advance to the next topic).\n"
-        "3. Set the verdict to 'gap' for this turn (since they did not answer the technical question).\n"
-        "4. Prompt them again to answer the technical question.\n\n"
+        "SPECIAL RULE FOR CANDIDATE QUESTIONS/GREETINGS/STALLS/UNKNOWN:\n"
+        "1. If the candidate asks a generic question or greets (e.g. 'what is ai?', 'hello'): answer/greet briefly, then prompt back to the technical topic.\n"
+        "2. If the candidate indicates they don't know, have no idea, or pass (e.g. 'no ide', 'no idea', 'idk', 'not sure', 'pass', 'skip'): acknowledge supportively without generic boilerplate, briefly explain or pivot to the next topic, and set verdict to 'gap'.\n"
+        "3. NEVER output static repetitive filler like 'Let's continue — could you expand on that?'. Every question MUST be unique and reference specific topic details.\n\n"
         "You MUST respond with a JSON object and nothing else:\n"
         "{\n"
         '  "verdict": "strong" | "partial" | "gap",\n'
         '  "shouldEnd": true | false,\n'
-        '  "nextQuestion": "<your response greeting/answering them directly, then prompting them back to the active technical question>",\n'
-        '  "moduleN": <int, of the current topic>,\n'
-        '  "focusReason": "<reason of the current topic>"\n'
+        '  "nextQuestion": "<your unique response greeting/answering them directly or pivoting, then asking a specific technical question>",\n'
+        '  "moduleN": <int, of the active topic>,\n'
+        '  "focusReason": "<reason of the active topic>"\n'
         "}\n\n"
         "If shouldEnd is true, omit nextQuestion/moduleN/focusReason."
     )
@@ -332,7 +328,7 @@ def grade_and_continue(
     except Exception as exc:
         logger.error("LLM grade_and_continue failed: %s", exc)
 
-    # Heuristic check for greetings or generic questions in fallback mode
+    # Heuristic check for greetings, generic questions, or unknown/pass answers in fallback mode
     last_candidate_msg = ""
     for entry in reversed(transcript):
         if entry["role"] == "candidate":
@@ -341,40 +337,44 @@ def grade_and_continue(
 
     is_greeting = any(last_candidate_msg.startswith(g) for g in ["hello", "hi", "hey", "greetings", "good morning", "good afternoon"])
     is_question = "?" in last_candidate_msg or any(q in last_candidate_msg for q in ["what is", "how do", "can you", "why do", "explain", "who is", "what are"])
+    is_unknown = any(u in last_candidate_msg for u in ["no ide", "no idea", "don't know", "dont know", "not sure", "idk", "pass", "skip", "no clue"])
 
     current_focus = focus_plan[current_focus_index]
 
     fallback_reply = ""
     if is_greeting:
-        fallback_reply = f"Hello! Let's stay focused on the technical evaluation. Regarding our topic on {current_focus['title']} — can you explain your understanding here?"
+        fallback_reply = f"Hello {user_name}! Let me know how you'd approach our evaluation topic on {current_focus['title']}."
     elif is_question:
-        # e.g. "what is ai" -> answer it briefly and prompt back
         if "what is ai" in last_candidate_msg:
-            fallback_reply = "AI stands for Artificial Intelligence, which involves systems simulating human intelligence. Let's return to our topic: regarding " + current_focus['title'] + ", can you describe your experience?"
+            fallback_reply = f"AI refers to algorithms that perform tasks requiring cognitive capabilities. Returning to {current_focus['title']} — how have you applied {current_focus['tools'][0] if current_focus['tools'] else 'these tools'}?"
         else:
-            fallback_reply = f"That is a good question! To keep our assessment on track, let's return to our topic. Regarding {current_focus['title']} — could you walk me through your approach?"
+            fallback_reply = f"Good question! To keep our assessment on track regarding {current_focus['title']} — could you describe your practical experience here?"
+    elif is_unknown:
+        if next_focus:
+            fallback_reply = f"No problem at all, {user_name}! Let's move on to our next area: {next_focus['title']}. How have you worked with {next_focus['tools'][0] if next_focus['tools'] else 'these tools'}?"
+        else:
+            fallback_reply = f"No worries! Regarding {current_focus['title']}, which concepts or tools are you most familiar with?"
 
     fallback: dict[str, Any] = {
-        "verdict": "gap" if is_question else "partial",
+        "verdict": "gap" if (is_question or is_unknown) else "partial",
         "shouldEnd": False,
     }
 
     if fallback_reply:
         fallback["nextQuestion"] = fallback_reply
-        fallback["moduleN"] = current_focus["moduleN"]
-        fallback["focusReason"] = current_focus["reason"]
+        fallback["moduleN"] = (next_focus["moduleN"] if (is_unknown and next_focus) else current_focus["moduleN"])
+        fallback["focusReason"] = (next_focus["reason"] if (is_unknown and next_focus) else current_focus["reason"])
     elif next_focus:
         fallback["nextQuestion"] = (
-            "Let's continue — could you expand on that? "
-            f"Also, let's touch on {next_focus['title']}. "
+            f"Let's explore {next_focus['title']}. "
             f"What's your experience with {next_focus['tools'][0] if next_focus['tools'] else 'this area'}?"
         )
         fallback["moduleN"] = next_focus["moduleN"]
         fallback["focusReason"] = next_focus["reason"]
     else:
-        fallback["nextQuestion"] = "Let's continue — could you expand on that?"
-        fallback["moduleN"] = 0
-        fallback["focusReason"] = "Follow-up"
+        fallback["nextQuestion"] = f"Regarding {current_focus['title']} — what was your main takeaway from implementing this?"
+        fallback["moduleN"] = current_focus["moduleN"]
+        fallback["focusReason"] = current_focus["reason"]
 
     return fallback
 
