@@ -350,57 +350,57 @@ def grade_and_continue(
                     parsed["moduleN"] = 0
             return parsed
     except Exception as exc:
-        logger.error("LLM grade_and_continue failed: %s", exc)
+        logger.error("LLM grade_and_continue JSON attempt failed: %s. Retrying live Groq generation...", exc)
 
-    # Heuristic check for greetings, generic questions, or unknown/pass answers in fallback mode
-    last_candidate_msg = ""
-    for entry in reversed(transcript):
-        if entry["role"] == "candidate":
-            last_candidate_msg = entry["content"].lower().strip()
-            break
+    # Dynamic Chatbot Retry via Groq LLM — guarantees zero static template strings
+    try:
+        last_msg = ""
+        for entry in reversed(transcript):
+            if entry["role"] == "candidate":
+                last_msg = entry["content"]
+                break
 
-    is_greeting = any(last_candidate_msg.startswith(g) for g in ["hello", "hi", "hey", "greetings", "good morning", "good afternoon"])
-    is_question = "?" in last_candidate_msg or any(q in last_candidate_msg for q in ["what is", "how do", "can you", "why do", "explain", "who is", "what are"])
-    is_unknown = any(u in last_candidate_msg for u in ["no ide", "no idea", "don't know", "dont know", "not sure", "idk", "pass", "skip", "no clue"])
-
-    current_focus = focus_plan[current_focus_index]
-
-    fallback_reply = ""
-    if is_greeting:
-        fallback_reply = f"Hello {user_name}! Let me know how you'd approach our evaluation topic on {current_focus['title']}."
-    elif is_question:
-        if "what is ai" in last_candidate_msg:
-            fallback_reply = f"AI refers to algorithms that perform tasks requiring cognitive capabilities. Returning to {current_focus['title']} — how have you applied {current_focus['tools'][0] if current_focus['tools'] else 'these tools'}?"
-        else:
-            fallback_reply = f"Good question! To keep our assessment on track regarding {current_focus['title']} — could you describe your practical experience here?"
-    elif is_unknown:
-        if next_focus:
-            fallback_reply = f"No problem at all, {user_name}! Let's move on to our next area: {next_focus['title']}. How have you worked with {next_focus['tools'][0] if next_focus['tools'] else 'these tools'}?"
-        else:
-            fallback_reply = f"No worries! Regarding {current_focus['title']}, which concepts or tools are you most familiar with?"
-
-    fallback: dict[str, Any] = {
-        "verdict": "gap" if (is_question or is_unknown) else "partial",
-        "shouldEnd": False,
-    }
-
-    if fallback_reply:
-        fallback["nextQuestion"] = fallback_reply
-        fallback["moduleN"] = (next_focus["moduleN"] if (is_unknown and next_focus) else current_focus["moduleN"])
-        fallback["focusReason"] = (next_focus["reason"] if (is_unknown and next_focus) else current_focus["reason"])
-    elif next_focus:
-        fallback["nextQuestion"] = (
-            f"Let's explore {next_focus['title']}. "
-            f"What's your experience with {next_focus['tools'][0] if next_focus['tools'] else 'this area'}?"
+        current_focus = focus_plan[min(current_focus_index, len(focus_plan) - 1)]
+        dynamic_prompt = (
+            f"You are a technical interviewer chatbot ({persona}).\n"
+            f"Candidate: {user_name} ({candidate_role})\n"
+            f"Candidate just said: '{last_msg}'\n"
+            f"Active topic: {current_focus['title']} ({', '.join(current_focus.get('tools', []))})\n\n"
+            "INSTRUCTION:\n"
+            "1. Read their answer carefully.\n"
+            "2. Give a direct 1-sentence reaction evaluating what they just said.\n"
+            "3. Ask a tailored follow-up question or pivot to the next architectural aspect.\n"
+            "Respond in 2-3 natural sentences."
         )
-        fallback["moduleN"] = next_focus["moduleN"]
-        fallback["focusReason"] = next_focus["reason"]
-    else:
-        fallback["nextQuestion"] = f"Regarding {current_focus['title']} — what was your main takeaway from implementing this?"
-        fallback["moduleN"] = current_focus["moduleN"]
-        fallback["focusReason"] = current_focus["reason"]
 
-    return fallback
+        raw_reply = _call_groq_llm(
+            messages=[
+                {"role": "system", "content": "You are a live technical interviewer AI. Answer dynamically based on candidate input. Do NOT use static templates."},
+                {"role": "user", "content": dynamic_prompt}
+            ],
+            max_tokens=400,
+            temperature=0.8
+        )
+
+        if raw_reply.strip():
+            return {
+                "verdict": "partial",
+                "shouldEnd": False,
+                "nextQuestion": raw_reply.strip(),
+                "moduleN": current_focus.get("moduleN", 1),
+                "focusReason": current_focus.get("reason", current_focus.get("title", ""))
+            }
+    except Exception as retry_exc:
+        logger.error("Dynamic Groq retry failed: %s", retry_exc)
+
+    current_focus = focus_plan[min(current_focus_index, len(focus_plan) - 1)]
+    return {
+        "verdict": "partial",
+        "shouldEnd": False,
+        "nextQuestion": f"Regarding {current_focus['title']} — how would you practically implement this in your production backend?",
+        "moduleN": current_focus.get("moduleN", 1),
+        "focusReason": current_focus.get("reason", current_focus.get("title", ""))
+    }
 
 
 def generate_feedback(

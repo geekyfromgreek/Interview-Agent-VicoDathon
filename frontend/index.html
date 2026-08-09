@@ -815,50 +815,45 @@
                     throw new Error(`Server returned HTTP ${res.status}`);
                 }
             } catch (err) {
-                console.error("TURN failed, executing retry flow:", err);
-                try {
-                    const retryRes = await fetch(`${getApiBase()}/api/interview`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            sessionId: appState.sessionId,
-                            message: message
-                        })
-                    });
-                    if (retryRes.ok) {
-                        const data = await retryRes.json();
-                        if (data.verdict) appState.transcript[appState.transcript.length - 1].verdict = data.verdict;
-                        if (data.done) {
-                            stopInterviewTimer();
-                            appState.feedback = data.feedback;
-                            saveInterviewSessionToHistory(appState.userName, appState.selectedCandidate, appState.selectedPersona, data.feedback, appState.transcript);
-                            navigateTo('feedback_report');
+                console.error("TURN failed, executing persistent Groq API retry loop:", err);
+                
+                // Patient Groq API retry loop — retries up to 3 times waiting for Render/Groq
+                for (let attempt = 1; attempt <= 3; attempt++) {
+                    try {
+                        await new Promise(r => setTimeout(r, attempt * 1500)); // 1.5s, 3.0s, 4.5s backoff
+                        const retryRes = await fetch(`${getApiBase()}/api/interview`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                sessionId: appState.sessionId,
+                                message: message
+                            })
+                        });
+
+                        if (retryRes.ok) {
+                            const data = await retryRes.json();
+                            if (data.verdict) appState.transcript[appState.transcript.length - 1].verdict = data.verdict;
+                            if (data.done) {
+                                stopInterviewTimer();
+                                appState.feedback = data.feedback;
+                                saveInterviewSessionToHistory(appState.userName, appState.selectedCandidate, appState.selectedPersona, data.feedback, appState.transcript);
+                                navigateTo('feedback_report');
+                                return;
+                            }
+                            appState.transcript.push({
+                                role: 'interviewer',
+                                content: data.reply,
+                                focusReason: data.focusReason,
+                                moduleN: data.moduleN
+                            });
+                            appState.questionsAsked++;
+                            speakInterviewerText(data.reply);
                             return;
                         }
-                        appState.transcript.push({
-                            role: 'interviewer',
-                            content: data.reply,
-                            focusReason: data.focusReason,
-                            moduleN: data.moduleN
-                        });
-                        appState.questionsAsked++;
-                        speakInterviewerText(data.reply);
-                        return;
+                    } catch (retryErr) {
+                        console.warn(`Groq API retry attempt ${attempt} failed:`, retryErr);
                     }
-                } catch (retryErr) {
-                    console.error("Retry also failed:", retryErr);
                 }
-
-                // Guarantee the interviewer ALWAYS responds, even if network is offline
-                const dynamicReply = `That is an interesting insight regarding '${message.slice(0, 40)}...'. Building on that, how would you design this for high-concurrency production workloads?`;
-                appState.transcript.push({
-                    role: 'interviewer',
-                    content: dynamicReply,
-                    focusReason: "System Design & Scaling",
-                    moduleN: appState.activeModule || 1
-                });
-                appState.questionsAsked++;
-                speakInterviewerText(dynamicReply);
             } finally {
                 appState.isTyping = false;
                 render();
