@@ -144,12 +144,12 @@ def generate_question(
     system_prompt = (
         f"{persona_instruction}\n"
         f"CRITICAL MANDATORY GREETING RULE: The person you are interviewing is named '{user_name}'. "
-        f"You MUST start your reply with 'Hello {user_name},' or 'Welcome {user_name},'. "
-        f"NEVER use the candidate profile name in the greeting — ONLY use '{user_name}'.\n"
+        f"You MUST start your reply with a natural, conversational greeting like 'Hi {user_name}, great to meet you.' or 'Welcome {user_name}, thanks for joining me today.' "
+        f"NEVER use the candidate profile name in the greeting — ONLY use '{user_name}'. Keep the tone human and welcoming.\n"
         "Ask ONE clear, specific technical question that tests whether the candidate truly understands "
-        "the topic — not a yes/no question. Personalise the question to their role.\n\n"
+        "the topic — not a yes/no question. Personalise the question to their role in a conversational manner.\n\n"
         "You MUST respond with a JSON object and nothing else:\n"
-        '{"reply": "<your question starting with Hello ' + user_name + '>", "moduleN": <int>, "focusReason": "<short reason>"}'
+        '{"reply": "<your conversational question starting with a natural greeting for ' + user_name + '>", "moduleN": <int>, "focusReason": "<short reason>"}'
     )
 
     user_prompt = (
@@ -305,14 +305,15 @@ def grade_and_continue(
         "Be fair and analytical — award 'strong' for accurate/solid understanding, "
         "'partial' for surface-level answers, and 'gap' for wrong, incorrect, or missing knowledge.\n\n"
         "INTERVIEW CONDUCT RULES:\n"
-        "1. Keep the conversation focused on the CURRENT TECHNICAL TOPIC. Do NOT let the candidate distract you with off-topic remarks or redirect the conversation.\n"
-        "2. If the candidate says something off-topic, briefly acknowledge it (1 short sentence max), then firmly steer back to the technical question.\n"
-        "3. Do NOT repeatedly say 'you mentioned' or 'as you said' — vary your language naturally. Give a brief evaluation, then move on to the next question.\n"
-        "4. Keep your responses concise: 1 short sentence of feedback + 1 clear follow-up question. Do NOT write long paragraphs.\n\n"
+        "1. Speak directly to the candidate in the first and second person ('I', 'you', 'we'). NEVER refer to the candidate in the third person (e.g., NEVER say 'the candidate correctly identified' or 'the candidate missed').\n"
+        "2. Use natural conversational bridges ('Makes sense', 'I see your point', 'Let's shift gears') instead of mechanically announcing topics (e.g., NEVER say 'Let's move on to Module X').\n"
+        "3. Keep the conversation focused on the CURRENT TECHNICAL TOPIC. Do NOT let the candidate distract you with off-topic remarks or redirect the conversation.\n"
+        "4. Do NOT repeatedly say 'you mentioned' or 'as you said' — vary your language naturally. Give a brief evaluation, then smoothly move on to the next question.\n"
+        "5. Keep your responses concise: 1 short conversational sentence of feedback + 1 clear follow-up question. Do NOT write long paragraphs.\n\n"
         "EVALUATION RULE:\n"
         "1. Evaluate the candidate's latest response against the expected answer reference.\n"
-        "2. If correct/strong, give a brief validation (e.g., 'Good, that's correct.'). If partial, note what's missing in 1 sentence. If gap, point out the error briefly.\n"
-        "3. Then ask a NEW follow-up question or move to the next topic. Never repeat the same question.\n\n"
+        "2. If correct/strong, give a brief conversational validation (e.g., 'Great explanation.'). If partial, note what's missing naturally in 1 sentence. If gap, point out the error gently.\n"
+        "3. Then ask a NEW follow-up question or transition smoothly to the next topic. Never repeat the same question.\n\n"
         "You MUST respond with a JSON object and nothing else:\n"
         "{\n"
         '  "verdict": "strong" | "partial" | "gap",\n'
@@ -414,14 +415,14 @@ def grade_and_continue(
             f"Active topic: {current_focus['title']} ({', '.join(current_focus.get('tools', []))})\n\n"
             "INSTRUCTION:\n"
             "1. Read their answer carefully.\n"
-            "2. Give a direct 1-sentence reaction evaluating what they just said.\n"
-            "3. Ask a tailored follow-up question or pivot to the next architectural aspect.\n"
+            "2. Give a direct 1-sentence reaction evaluating what they just said using natural, conversational 1st/2nd person language (e.g., 'I see', 'You made a good point'). NEVER use 3rd person like 'the candidate stated'.\n"
+            "3. Use a natural conversational bridge ('Let's shift gears to...', 'Makes sense, now what about...') to ask a tailored follow-up question or pivot to the next architectural aspect.\n"
             "Respond in 2-3 natural sentences."
         )
 
         raw_reply = _call_groq_llm(
             messages=[
-                {"role": "system", "content": "You are a live technical interviewer AI. Answer dynamically based on candidate input."},
+                {"role": "system", "content": "You are a live technical interviewer AI. Answer dynamically and naturally in the 1st/2nd person based on candidate input."},
                 {"role": "user", "content": dynamic_prompt}
             ],
             max_tokens=400,
